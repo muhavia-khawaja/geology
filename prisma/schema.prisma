@@ -13,62 +13,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
-
-
-
-model Topics {
-  
-  id        String   @id @default(uuid()) @map("_id")
-  title      String
-  short_desc String   @db.String
-  long_desc  String   @db.String     
-  tags       String[]   
-  createdAt  DateTime @default(now())
-  subjectId  String?
-  subject    Subject?  @relation(fields: [subjectId], references: [id])
-}
-
-model Subject {
-  
-  id        String   @id @default(uuid()) @map("_id")
-  name        String   
-  short_name  String   @default("Unknown") 
-  short_desc  String   
-  tags       String[]
-  topics      Topics[]  
-}
-
-
 model Admin {
-  
-  id        String   @id @default(cuid()) @map("_id")
-  name     String  
-  email    String  @unique
-  password String  
-  role     Role    @default(MANAGER)  
+  id       String @id @default(cuid()) @map("_id")
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(ADMIN)
 
-  @@map("admins") 
+  @@map("admins")
 }
 
 enum Role {
   ADMIN
-  MANAGER
-  CONTENT_MANAGER
 }
-
-
-
-
-model Gallery {
-
-  id        String   @id @default(uuid()) @map("_id")
-  title     String
-  images    Json   
-  createdAt DateTime @default(now())
-}
-
 
 model Contact {
   id        String   @id @default(uuid()) @map("_id")
@@ -78,45 +35,68 @@ model Contact {
   createdAt DateTime @default(now())
 }
 
-model pdf {
-  id        String   @id @default(uuid()) @map("_id")
-  title     String
-  url       String
-  tags     String[]
-  like    Int @default(0)
-  createdAt DateTime @default(now())
-  download  Int @default(0)
-}
-
-
-
-
-
-model Scheme {
-  id        String   @id @default(uuid()) @map("_id")
-  title     String
-  short_desc String @db.String
-  tags    String[]
-  url String
-  class   String
- createdAt DateTime @default(now())
- reviews  Review[]
- 
-}
-
-
 model Review {
-   id        String   @id @default(uuid()) @map("_id")
-   content     String
-   name        String
-   email       String
-   rating      Int
-  schemeId   String?
-  scheme    Scheme?  @relation(fields: [schemeId], references: [id])
+  id        String   @id @default(uuid()) @map("_id")
+  content   String
+  name      String
+  email     String
+  rating    Int
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id])
 }
 
-model NewsLetter {
-  id        String   @id @default(uuid()) @map("_id")
-  email       String
-  createdAt     DateTime  @default(now())
+model Article {
+  id         String   @id @default(uuid()) @map("_id")
+  slug       String   @unique
+  title      String
+  short_desc String
+  long_desc  String
+  image      String
+  featured  Boolean @default(false)
+  createdAt  DateTime @default(now())
+  Review     Review[]
+}
+
+
+
+model Category {
+  id         String   @id @default(uuid()) @map("_id")
+  title       String
+  long_desc  String
+  featured  Boolean @default(false)
+  createdAt  DateTime @default(now())
+  display_order  Int @default(0)
+
+  items  Item[]
+}
+
+
+model Item {
+  id           String   @id @default(uuid()) @map("_id")
+  title        String
+  slug         String   @unique
+  short_desc   String
+  long_desc    String
+  image        String
+
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  subItem       SubItem[]
+ 
+  createdAt    DateTime @default(now())
+}
+
+
+
+model SubItem {
+   id           String   @id @default(uuid()) @map("_id")
+  title        String
+  slug         String   @unique
+  short_desc   String
+  long_desc    String
+  image        String
+  
+  itemId        String
+  item    Item @relation(fields: [itemId], references: [id])
+  createdAt    DateTime @default(now())
 }

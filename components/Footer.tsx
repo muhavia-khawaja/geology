@@ -1,64 +1,44 @@
-import { link } from 'fs'
-import Link from 'next/link'
 import React from 'react'
-
-const data = [
-  { id: 1, name: 'Contact Us', link: '/contact' },
-  { id: 2, name: 'Subjects', link: '/subjects' },
-  { id: 3, name: 'Notes PDF', link: '/notes-pdf' },
-  { id: 4, name: 'About Us', link: '/about-us' },
-]
 
 export default function Footer() {
   return (
-    <footer className='footer footer-horizontal footer-center bg-base-200 text-base-content rounded p-10 overflow-hidden md:overflow-auto'>
-      <nav className='sm:grid grid-flow-col gap-4 flex flex-col'>
-        {data.map((item) => (
-          <Link key={item.id} href={item.link} className='link link-hover '>
-            {item.name}
-          </Link>
-        ))}
-      </nav>
-      <nav>
-        <div className='grid grid-flow-col gap-4'>
-          <Link
-            href='https://www.youtube.com/@EducationWithHamza-g8v'
-            target='_blank'
-            aria-label='Visit our YouTube channel'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='24'
-              height='24'
-              viewBox='0 0 24 24'
-              className='fill-current'
-            >
-              <path d='M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z'></path>
-            </svg>
-          </Link>
-          <Link
-            href='https://www.facebook.com/profile.php?id=61566559002640'
-            target='_blank'
-            aria-label='Visit our Facebook Page'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='24'
-              height='24'
-              viewBox='0 0 24 24'
-              className='fill-current'
-            >
-              <path d='M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z'></path>
-            </svg>
-          </Link>
+    <footer className='bg-[#151515] text-neutral-content rounded-xl px-6 py-10'>
+      <div className='max-w-7xl mx-auto flex flex-col gap-10 md:grid md:grid-cols-4'>
+        <div className='flex flex-col justify-between gap-6'>
+          <h2 className='text-3xl font-semibold lowercase tracking-wide text-white'>
+            grave <br />
+            stone
+          </h2>
+
+          <p className='text-sm text-white/50 md:hidden'>
+            © 2024 Gravestone. All rights reserved.
+          </p>
         </div>
-      </nav>
-      <aside>
-        <p className='text-xs md:text-sm '>
-          Copyright © {new Date().getFullYear()} - All right reserved by
-          Education With Hamza
-        </p>
-      </aside>
+
+        <div>
+          <h6 className='text-white font-semibold mb-4'>System Integration</h6>
+          <div className='flex flex-col gap-2 text-white/70'>
+            <a className='hover:text-white transition'>Facebook</a>
+            <a className='hover:text-white transition'>GitHub</a>
+          </div>
+        </div>
+
+        <div>
+          <h6 className='text-white font-semibold mb-4'>Explore</h6>
+          <div className='flex flex-col gap-2 text-white/70'>
+            <a className='hover:text-white transition'>Features</a>
+            <a className='hover:text-white transition'>Enterprise</a>
+          </div>
+        </div>
+
+        <div className='flex items-end md:items-start'>
+          <p className='text-white/60'>Built with ❤️ by Gravestone Team</p>
+        </div>
+      </div>
+
+      <div className='hidden md:block mt-10 border-t border-white/10 pt-6 text-sm text-white/50 text-right max-w-7xl mx-auto'>
+        © 2024 Gravestone. All rights reserved.
+      </div>
     </footer>
   )
 }

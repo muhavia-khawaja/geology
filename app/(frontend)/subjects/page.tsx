@@ -1,67 +1,38 @@
-import { getAllSubject } from '@/utils/actions'
+import Image from 'next/image'
 import Link from 'next/link'
+import React from 'react'
 
-export const metadata = {
-  title: ' Top Subjects',
-  description:
-    'Explore various MBA subjects with detailed topics to enhance your learning experience.',
-  keywords:
-    'MBA, MBA subjects, online education, learning, study resources, business management',
-  author: 'Ameer Muhavia',
-}
-
-export const revalidate = 0
-
-export default async function Page() {
-  const subjects = await getAllSubject()
+export default function page() {
+  const subjectsLength = 20
   return (
-    <div className='max-w-2xl mx-auto px-4 py-6'>
-      <h1 className='text-2xl font-semibold mb-4'>Subjects</h1>
-      <div className='space-y-10'>
-        {subjects.map((subject) => (
+    <div className='p-20'>
+      <h2>{subjectsLength} Subject</h2>
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-10 mt-4'>
+        {[...Array(20)].map((_, i) => (
           <div
-            key={subject.id}
-            className='card border rounded-none p-4 bg-base-100'
+            key={i}
+            className='card shadow-2xl  hover:animate-pulse transform rotate-6 hover:rotate-0 cursor-pointer'
           >
-            <Link
-              href={`/subject/${subject.id}`}
-              className='text-blue-600 font-medium text-lg hover:underline cursor-pointer'
-            >
-              {subject.name}
-            </Link>
-            <p className='text-gray-500 text-sm'>
-              Contains ({subject.topics.length}) topics.
-            </p>
-            <p className='text-sm mt-4 text-black'>{subject.short_desc}</p>
+            <figure>
+              <Image src='/banner.jpg' alt='' width={300} height={300} />
+            </figure>
+            <div className='card-body mt-0'>
+              <h2 className='card-title '>Subject {i + 1}</h2>
+              <p className='text-gray-100'>
+                Author:{' '}
+                <span className='text-primary font-bold'>
+                  Mark Lewis {i + 1}
+                </span>
+              </p>
+              <Link
+                href={'#'}
+                className='text-primary hover:underline leading-10 '
+              >
+                View Now
+              </Link>
+            </div>
           </div>
         ))}
-      </div>
-
-      <div className='prose mx-auto px-6 md:px-10 py-10 max-w-4xl text-justify mt-10'>
-        <h2 className='text-2xl font-bold mb-4 text-center'>
-          Explore Subjects & Resources
-        </h2>
-        <p className='my-5'>
-          This section offers a wide range of subjects to help you navigate your
-          academic interests more effectively. Whether you &#39; re studying for
-          exams, revising concepts, or diving deeper into a particular topic,
-          each subject page connects you with curated study materials,
-          topic-wise notes, and helpful resources.
-        </p>
-        <p className='my-5'>
-          All subjects include organized collections of PDFs, summaries, and
-          reference content created or shared by educators and learners. These
-          materials are freely available for personal and educational use. If
-          you encounter any content that may require proper attribution or
-          removal, please reach out to us.
-        </p>
-        <p>
-          We continuously update subjects with the latest and most relevant
-          material. Bookmark your favorite subjects and check back regularly for
-          new content. Whether you &#39; re in school, college, or just
-          exploring a new topic, you &#39; ll find reliable and well-structured
-          support here.
-        </p>
       </div>
     </div>
   )

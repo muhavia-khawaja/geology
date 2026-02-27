@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
-import { SignJWT } from 'jose'
+import { jwtVerify, SignJWT } from 'jose'
 import {
   v2 as cloudinary,
   UploadApiErrorResponse,
@@ -18,270 +18,71 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-export const getAllSubject = async () => {
-  return await prisma.subject.findMany({
-    include: { topics: true },
-  })
-}
-
-export const getAllTopics = async (query: string) => {
-  if (!query) {
-    return await prisma.topics.findMany({
-      include: {
-        subject: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-  }
-
-  return {
-    topics: await prisma.topics.findMany({
-      where: {
-        title: {
-          contains: query.toLowerCase(),
-          mode: 'insensitive',
-        },
-      },
-      include: {
-        subject: true,
-      },
-    }),
-  }
-}
-
-export const createTopic = async (formData: FormData) => {
-  const title = formData.get('title')
-  const short_desc = formData.get('short_desc')
-  const long_desc = formData.get('long_desc')
-  const subjectId = formData.get('subjectId')
-  const tags = formData.get('tags')
-
-  if (typeof tags !== 'string' || !tags.trim()) {
-    throw new Error('Tags is required and must be a valid string.')
-  }
-
-  if (typeof title !== 'string' || !title.trim()) {
-    throw new Error('Title is required and must be a valid string.')
-  }
-
-  if (typeof short_desc !== 'string' || !short_desc.trim()) {
-    throw new Error('Short description is required and must be a valid string.')
-  }
-
-  if (typeof long_desc !== 'string' || !long_desc.trim()) {
-    throw new Error('Long description is required and must be a valid string.')
-  }
-
-  if (typeof subjectId !== 'string' || !subjectId.trim()) {
-    throw new Error('Subject ID is required and must be a valid string.')
-  }
-
-  const tagsArray = tags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
-
-  await prisma.topics.create({
-    data: {
-      title,
-      short_desc,
-      long_desc,
-      tags: tagsArray,
-      subjectId,
-    },
-  })
-  revalidatePath('/control/topics')
-  redirect('add-topic?success=true')
-}
-
-export const updateTopic = async (formData: FormData) => {
-  const id = formData.get('id')
-  const title = formData.get('title')
-  const short_desc = formData.get('short_desc')
-  const long_desc = formData.get('long_desc')
-  const subjectId = formData.get('subjectId')
-
-  if (typeof title !== 'string' || !title.trim()) {
-    throw new Error('Title is required and must be a valid string.')
-  }
-
-  if (typeof short_desc !== 'string' || !short_desc.trim()) {
-    throw new Error('Short description is required and must be a valid string.')
-  }
-
-  if (typeof long_desc !== 'string' || !long_desc.trim()) {
-    throw new Error('Long description is required and must be a valid string.')
-  }
-
-  if (typeof subjectId !== 'string' || !subjectId.trim()) {
-    throw new Error('Subject ID is required and must be a valid string.')
-  }
-  if (typeof id !== 'string' || !id.trim()) {
-    throw new Error('ID is required and must be a valid string.')
-  }
-
-  await prisma.topics.update({
-    where: {
-      id,
-    },
-    data: {
-      title,
-      short_desc,
-      long_desc,
-      subjectId,
-    },
-  })
-
-  redirect('?success=true')
-}
-
-export const getSingleTopic = async (id: string) => {
-  return await prisma.topics.findUnique({
-    where: {
-      id,
-    },
-    include: { subject: true },
-  })
-}
-
-export const deleteTopic = async (formData: FormData) => {
-  const id = formData.get('id')
-  if (typeof id !== 'string' || !id.trim()) {
-    throw new Error('Id is Required')
-  }
-  await prisma.topics.delete({
-    where: {
-      id,
-    },
-  })
-  revalidatePath('/')
-}
-
-export const createSubject = async (formData: FormData) => {
-  const name = formData.get('name')
-  const short_desc = formData.get('short_desc')
-  const short_name = formData.get('short_name')
-  const tags = formData.get('tags')
-
-  if (typeof tags !== 'string' || !tags.trim()) {
-    throw new Error('Tags is required and must be a valid string.')
-  }
-
-  if (typeof name !== 'string' || !name.trim()) {
-    throw new Error('Name is required and must be a valid string.')
-  }
-
-  if (typeof short_name !== 'string') {
-    throw new Error('Short Name is required and must be a valid string.')
-  }
-
-  if (typeof short_desc !== 'string') {
-    throw new Error('Short Desc is required and must be a valid string.')
-  }
-
-  const tagArray = tags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
-
-  await prisma.subject.create({
-    data: {
-      name,
-      short_name,
-      short_desc,
-      tags: tagArray,
-    },
-  })
-  revalidatePath('/control/subjects')
-  redirect('/control/subjects')
-}
-
-export const updateSubject = async (formData: FormData) => {
-  const id = formData.get('id')
-  const name = formData.get('name')
-  const short_name = formData.get('short_name')
-  const short_desc = formData.get('short_desc')
-
-  if (typeof id !== 'string' || !id.trim()) {
-    throw new Error('ID is required and must be a valid string.')
-  }
-
-  if (typeof name !== 'string' || !name.trim()) {
-    throw new Error('Name is required and must be a valid string.')
-  }
-
-  if (typeof short_name !== 'string') {
-    throw new Error('Short Name is required and must be a valid string.')
-  }
-
-  if (typeof short_desc !== 'string') {
-    throw new Error('Short Desc is required and must be a valid string.')
-  }
-
-  await prisma.subject.update({
-    where: {
-      id,
-    },
-    data: {
-      name,
-      short_name,
-      short_desc,
-    },
-  })
-
-  redirect('?success=true')
-}
-
-export const getSinglSubject = async (id: string) => {
-  return await prisma.subject.findUnique({
-    where: {
-      id,
-    },
-    include: { topics: true },
-  })
-}
-
-export const deleteSubject = async (formData: FormData) => {
-  const id = formData.get('id')
-
-  if (typeof id !== 'string' || !id.trim()) {
-    throw new Error('Id is required')
-  }
-
-  try {
-    await prisma.subject.delete({
-      where: {
-        id,
-      },
-    })
-
-    revalidatePath('/control/subjects')
-  } catch (error) {
-    console.error('Error deleting subject:', error)
-
-    throw new Error(`Failed to delete subject`)
-  }
-}
-
 export async function createFirstAdmin() {
   const isAlreadyAdmin = await prisma.admin.findFirst()
 
   if (isAlreadyAdmin) {
     throw new Error('Admin ALready exists.')
   }
-  const hashedPassword = await bcrypt.hash('Admin@123', 10)
+  const hashedPassword = await bcrypt.hash('Password@123', 10)
 
   const admin = await prisma.admin.create({
     data: {
       name: 'Admin',
-      email: 'admin@notes.com',
+      email: 'admin@geology.com',
       password: hashedPassword,
       role: 'ADMIN',
     },
   })
   return admin
+}
+
+export const updateAdmin = async (formData: FormData) => {
+  const id = formData.get('id') as string
+  const name = formData.get('name') as string
+  const email = formData.get('email') as string
+  const pass = formData.get('password') as string
+  const updatePassword = formData.get('updatePassword') === 'on'
+
+  if (!name || !email) {
+    redirect('/control/profile?error=missing-fields')
+  }
+
+  if (updatePassword) {
+    if (!pass || pass.length < 6) {
+      redirect('/control/profile?error=password-short')
+    }
+  }
+
+  if (updatePassword) {
+    if (!pass || pass.length < 6) {
+      throw new Error('Password must be at least 6 characters')
+    }
+
+    const hashedPassword = await bcrypt.hash(pass, 10)
+
+    await prisma.admin.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    })
+
+    revalidatePath('/control/profile?success=true')
+    redirect('/control/profile?success=true')
+  }
+
+  await prisma.admin.update({
+    where: { id },
+    data: {
+      name,
+      email,
+    },
+  })
+  revalidatePath('/control/profile?success=true')
+  redirect('/control/profile?success=true')
 }
 
 export const login = async (formData: FormData) => {
@@ -291,19 +92,19 @@ export const login = async (formData: FormData) => {
   if (!email || !password) {
     return redirect(
       '/control/login?error=' +
-        encodeURIComponent('Email and password are required.')
+        encodeURIComponent('Email and password are required.'),
     )
   }
 
   if (typeof email !== 'string' || !email.trim()) {
     return redirect(
-      '/control/login?error=' + encodeURIComponent('Invalid email format.')
+      '/control/login?error=' + encodeURIComponent('Invalid email format.'),
     )
   }
 
   if (typeof password !== 'string' || !password.trim()) {
     return redirect(
-      '/control/login?error=' + encodeURIComponent('Invalid password format.')
+      '/control/login?error=' + encodeURIComponent('Invalid password format.'),
     )
   }
 
@@ -311,14 +112,14 @@ export const login = async (formData: FormData) => {
 
   if (!user) {
     return redirect(
-      '/control/login?error=' + encodeURIComponent('User not found.')
+      '/control/login?error=' + encodeURIComponent('User not found.'),
     )
   }
 
   const isMatch = await bcrypt.compare(password, user.password)
   if (!isMatch) {
     return redirect(
-      '/control/login?error=' + encodeURIComponent('Invalid credentials.')
+      '/control/login?error=' + encodeURIComponent('Invalid credentials.'),
     )
   }
 
@@ -343,119 +144,30 @@ export const login = async (formData: FormData) => {
   redirect('/control')
 }
 
+export const getAdmin = async (token: string) => {
+  if (!token || !process.env.JWT_SECRET) return null
+
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(process.env.JWT_SECRET),
+    )
+
+    const userId = payload.id as string
+
+    return await prisma.admin.findUnique({
+      where: { id: userId },
+    })
+  } catch (error) {
+    console.error('JWT verification failed:', error)
+    return null
+  }
+}
+
 export const logout = async () => {
   cookies().delete('token')
   cookies().delete('role')
   redirect('/control/login?error=unauthenticated')
-}
-export const createGallery = async (formData: FormData) => {
-  const files = formData.getAll('files') as File[]
-  const title = formData.get('title') as string
-
-  if (!title || files.length === 0) {
-    throw new Error('Title and files are required')
-  }
-
-  try {
-    const uploadPromises = files.map(async (file) => {
-      const arrayBuffer = await file.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-
-      return new Promise<{ secure_url: string; public_id: string }>(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({ folder: 'gallery' }, (error, result) => {
-              if (error || !result) {
-                return reject(error || new Error('Upload failed'))
-              }
-              resolve({
-                secure_url: result.secure_url,
-                public_id: result.public_id,
-              })
-            })
-            .end(buffer)
-        }
-      )
-    })
-
-    const uploadedImages = await Promise.all(uploadPromises)
-
-    await prisma.gallery.create({
-      data: {
-        title,
-        images: uploadedImages,
-      },
-    })
-    revalidatePath('/control/gallery')
-  } catch (error) {
-    console.error('Upload failed:', error)
-    throw new Error('Gallery creation failed')
-  }
-  redirect('/control/gallery/add-gallery?success=true')
-}
-
-export const getAllGallery = async () => {
-  return await prisma.gallery.findMany({})
-  revalidatePath('/')
-}
-
-export const updateGallery = async (formData: FormData) => {
-  console.log(formData)
-
-  const galleryId = formData.get('galleryId') as string
-  const title = formData.get('title') as string
-  const existingImages = formData.getAll('existingImages') as string[]
-  const newImages = formData.getAll('newImages') as File[]
-
-  if (
-    !galleryId ||
-    !title ||
-    (existingImages.length === 0 && newImages.length === 0)
-  ) {
-    throw new Error('Gallery ID, title, and at least one image are required')
-  }
-
-  const gallery = await prisma.gallery.findUnique({ where: { id: galleryId } })
-  if (!gallery) throw new Error('Gallery not found')
-
-  const uploadedImages = await Promise.all(
-    newImages.map(async (file) => {
-      const buffer = Buffer.from(await file.arrayBuffer())
-      return new Promise<{ secure_url: string; public_id: string }>(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({ folder: 'gallery' }, (error, result) => {
-              if (error || !result) reject(error || new Error('Upload failed'))
-              else
-                resolve({
-                  secure_url: result.secure_url,
-                  public_id: result.public_id,
-                })
-            })
-            .end(buffer)
-        }
-      )
-    })
-  )
-
-  const images = [
-    ...existingImages.map((url) => ({ secure_url: url })),
-    ...uploadedImages,
-  ]
-
-  await prisma.gallery.update({
-    where: { id: galleryId },
-    data: { title, images },
-  })
-  redirect(`/control/gallery/edit-gallery/${galleryId}?success=true`)
-}
-
-export const getSingleGallery = async (id: string) => {
-  return await prisma.gallery.findUnique({
-    where: {
-      id,
-    },
-  })
 }
 
 export const createComment = async (formData: FormData) => {
@@ -490,264 +202,8 @@ export const deleteComment = async (formData: FormData) => {
       id: id as string,
     },
   })
-
   revalidatePath('/control/contact')
-}
-
-export const createPdf = async (formData: FormData) => {
-  try {
-    const title = formData.get('title') as string
-    const file = formData.get('pdf') as File
-    const tags = formData.get('tags') as string
-
-    if (!title || !file) {
-      throw new Error('Title and file are required')
-    }
-
-    if (file.type !== 'application/pdf') {
-      throw new Error('Only PDF files are allowed')
-    }
-
-    const tagsArray = tags
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0)
-
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    const result = await new Promise<UploadApiResponse>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'pdfs',
-          resource_type: 'raw',
-          transformation: [
-            {
-              width: 1000,
-              height: 1000,
-              crop: 'limit',
-            },
-          ],
-        },
-        (error, result) => {
-          if (error || !result) {
-            return reject(error || new Error('Upload failed'))
-          }
-          resolve(result)
-        }
-      )
-
-      stream.end(buffer)
-    })
-
-    await prisma.pdf.create({
-      data: {
-        title,
-        url: result.secure_url,
-        tags: tagsArray,
-      },
-    })
-  } catch (error: any) {
-    console.error('Error creating PDF:', error)
-
-    throw new Error(
-      `Failed to create PDF. Error details: ${error.message || error}`
-    )
-  }
-
-  redirect('/control/pdf')
-}
-
-export const incrementPdfLike = async (formData: FormData) => {
-  const id = formData.get('id') as string
-  const action = formData.get('like') as string
-
-  if (!id) {
-    throw new Error('Invalid form submission')
-  }
-
-  const pdf = await prisma.pdf.findUnique({ where: { id } })
-  if (!pdf) throw new Error('pdf not found')
-
-  await prisma.pdf.update({
-    where: { id },
-    data: {
-      like: pdf.like + 1,
-    },
-  })
-
-  revalidatePath(`/notes-pdf/${id}`)
-}
-
-export const getAllPdf = async (query: string, limit: number) => {
-  const findOptions: any = {
-    take: limit,
-  }
-
-  if (query) {
-    findOptions.where = {
-      title: {
-        contains: query.toLowerCase(),
-        mode: 'insensitive',
-      },
-    }
-  }
-
-  return await prisma.pdf.findMany(findOptions)
-}
-
-export const getSinglePdf = async (id: string) => {
-  return await prisma.pdf.findUnique({
-    where: { id },
-  })
-}
-
-export const updateDownloadCount = async (id: string) => {
-  const pdf = await prisma.pdf.findUnique({
-    where: { id },
-    select: { download: true },
-  })
-
-  if (!pdf) {
-    console.error('PDF not found')
-    return
-  }
-
-  const updatedPdf = await prisma.pdf.update({
-    where: { id },
-    data: {
-      download: pdf.download + 1,
-    },
-  })
-
-  revalidatePath('/notes-pdf')
-
-  return updatedPdf
-}
-
-export const deletePdf = async (formData: FormData) => {
-  const id = formData.get('id') as string | number
-
-  await prisma.pdf.delete({
-    where: {
-      id: id as string,
-    },
-  })
-
-  revalidatePath('/control/pdf')
-}
-
-export const createScheme = async (formData: FormData) => {
-  try {
-    const title = formData.get('title') as string
-    const short_desc = formData.get('short_desc') as string
-    const tags = formData.get('tags') as string
-    const classEl = formData.get('class') as string
-    const file = formData.get('url') as File
-
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-
-    if (!title || !file || !short_desc || !tags || !classEl) {
-      throw new Error('please fill out all fields.')
-    }
-
-    if (file.type !== 'application/pdf') {
-      throw new Error('Only PDF files are allowed')
-    }
-
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    const result = await new Promise<UploadApiResponse>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'pdfs',
-          resource_type: 'raw',
-          transformation: [
-            {
-              width: 1000,
-              height: 1000,
-              crop: 'limit',
-            },
-          ],
-        },
-        (error, result) => {
-          if (error || !result) {
-            return reject(error || new Error('Upload failed'))
-          }
-          resolve(result)
-        }
-      )
-
-      stream.end(buffer)
-    })
-
-    const tagsArray = tags
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0)
-
-    await prisma.scheme.create({
-      data: {
-        title,
-        short_desc,
-        tags: tagsArray,
-        class: classEl,
-        url: result.secure_url,
-      },
-    })
-  } catch (error: any) {
-    console.error('Error creating PDF:', error)
-
-    throw new Error(
-      `Failed to create PDF. Error details: ${error.message || error}`
-    )
-  }
-
-  redirect('/control/scheme')
-}
-
-export const getAllScheme = async () => {
-  return await prisma.scheme.findMany({
-    orderBy: {
-      createdAt: 'desc',
-    },
-  })
-}
-
-export const getSingleScheme = async (id: string) => {
-  return await prisma.scheme.findUnique({
-    where: {
-      id,
-    },
-  })
-}
-
-export const deleteScheme = async (formData: FormData) => {
-  const id = formData.get('id')
-  if (typeof id !== 'string' || !id.trim()) {
-    throw new Error('Id is Required')
-  }
-  await prisma.scheme.delete({
-    where: {
-      id,
-    },
-  })
-  revalidatePath('/control/scheme')
-}
-
-export const deleteGallery = async (formData: FormData) => {
-  const id = formData.get('id') as string | number
-  await prisma.gallery.delete({
-    where: {
-      id: id as string,
-    },
-  })
-
-  revalidatePath('/control/gallery')
+  redirect('/control/contact?success=true')
 }
 
 export const createReview = async (formData: FormData) => {
@@ -755,9 +211,19 @@ export const createReview = async (formData: FormData) => {
   const email = formData.get('email') as string
   const content = formData.get('content') as string
   const rating = parseInt(formData.get('rating') as string)
-  const schemeId = formData.get('schemeId') as string
+  const articleId = formData.get('articleId') as string
 
-  if (!name || !email || !content || !rating || !schemeId) {
+  const blog = await prisma.article.findFirst({
+    where: {
+      id: articleId,
+    },
+  })
+
+  if (!blog) {
+    throw new Error('Blog Not Found')
+  }
+
+  if (!name || !email || !content || !rating || !articleId) {
     throw new Error('Missing required fields')
   }
 
@@ -767,25 +233,42 @@ export const createReview = async (formData: FormData) => {
       email,
       content,
       rating,
-      schemeId,
+      articleId,
     },
   })
 
-  revalidatePath(`/scheme/${schemeId}`)
+  revalidatePath(`/blog/${blog.slug}?success=true`)
+  redirect(`/blog/${blog.slug}?success=true`)
 }
 
-export const getSchemeReview = async (id: string) => {
+export const getAllReview = async () => {
+  return await prisma.review.findMany({})
+}
+
+export const getArticleReview = async (id: string) => {
   return await prisma.review.findMany({
     where: {
-      schemeId: id,
+      articleId: id,
     },
   })
+}
+
+export const deleteReview = async (formData: FormData) => {
+  const id = formData.get('id') as string | number
+
+  await prisma.review.delete({
+    where: {
+      id: id as string,
+    },
+  })
+  revalidatePath('/control/reviews')
+  redirect('/control/reviews?success=true')
 }
 
 export const getAverageSchemeReview = async (id: string) => {
   const result = await prisma.review.aggregate({
     where: {
-      schemeId: id,
+      articleId: id,
     },
     _avg: {
       rating: true,
@@ -795,75 +278,468 @@ export const getAverageSchemeReview = async (id: string) => {
   return result._avg.rating ?? 0
 }
 
-export const deleteAllReview = async () => {
-  await prisma.review.deleteMany({})
-}
-
-export const subscribeEmail = async (formData: FormData) => {
-  const email = formData.get('email') as string
-  if (!email) {
-    throw new Error('Email must be provided.')
-  }
-
-  return await prisma.newsLetter.create({
-    data: {
-      email,
-    },
-  })
-}
-export const updateScheme = async (formData: FormData) => {
-  const schemeId = formData.get('schemeId') as string
+export const createArticle = async (formData: FormData) => {
   const title = formData.get('title') as string
-  const existingFile = formData.get('existingFile') as string
-  const newFile = formData.get('url') as File
+  const short_desc = formData.get('short_desc') as string
+  const long_desc = formData.get('long_desc') as string
+  const image = formData.get('image') as File
+  const slug = formData.get('slug') as string
+  const featured = formData.get('featured') === 'on'
 
-  const isValidNewFile = newFile && newFile.size > 0
-
-  if (!schemeId || !title || (!existingFile && !newFile)) {
-    throw new Error('Scheme ID, title, and a PDF file are required')
+  if (!title || !long_desc || !image || !slug || !short_desc) {
+    throw new Error('All fields are required')
   }
-
-  const scheme = await prisma.scheme.findUnique({ where: { id: schemeId } })
-  if (!scheme) throw new Error('Scheme not found')
-
-  let uploadedFileUrl = existingFile
-
-  if (isValidNewFile) {
-    const buffer = Buffer.from(await newFile.arrayBuffer())
-
-    const uploaded = await new Promise<{
-      secure_url: string
-      public_id: string
-    }>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: 'pdfs',
-            resource_type: 'raw',
-            format: 'pdf',
-          },
-          (error, result) => {
-            if (error || !result) reject(error || new Error('Upload failed'))
-            else
-              resolve({
-                secure_url: result.secure_url,
-                public_id: result.public_id,
-              })
+  const imageBuffer = await image.arrayBuffer()
+  const imageBuff = Buffer.from(imageBuffer)
+  const imageResult = await new Promise<UploadApiResponse>(
+    (resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'geology/articles',
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error || !result) {
+            return reject(error || new Error('Upload failed'))
           }
-        )
-        .end(buffer)
-    })
-
-    uploadedFileUrl = uploaded.secure_url
-  }
-
-  await prisma.scheme.update({
-    where: { id: schemeId },
+          resolve(result)
+        },
+      )
+      stream.end(imageBuff)
+    },
+  )
+  await prisma.article.create({
     data: {
       title,
-      url: uploadedFileUrl ? uploadedFileUrl : existingFile,
+      long_desc,
+      short_desc,
+      slug,
+      featured,
+      image: imageResult.secure_url,
+    },
+  })
+  redirect(`/control/articles/create?success=true`)
+}
+
+export const getAllArticles = async () => {
+  return await prisma.article.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+}
+
+export const getFeaturedArticles = async () => {
+  return await prisma.article.findMany({
+    where: {
+      featured: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+}
+
+export const deleteArticle = async (formData: FormData) => {
+  const id = formData.get('id') as string | number
+
+  await prisma.article.delete({
+    where: {
+      id: id as string,
+    },
+  })
+  revalidatePath('/control/articles')
+  redirect('/control/articles?success=true')
+}
+
+export const getSingleArticle = async (slug: string) => {
+  return await prisma.article.findUnique({
+    where: { slug },
+  })
+}
+export const updateArticle = async (formData: FormData) => {
+  const id = formData.get('id') as string
+  const title = formData.get('title') as string
+  const short_desc = formData.get('short_desc') as string
+  const long_desc = formData.get('long_desc') as string
+  const slug = formData.get('slug') as string
+  const featured = formData.get('featured') === 'on'
+  const image = formData.get('image') as File | null
+
+  const existingArticle = await prisma.article.findUnique({
+    where: { id },
+  })
+
+  if (!existingArticle) throw new Error('Article not found')
+
+  let imageUrl = existingArticle.image
+
+  if (image && image.size > 0) {
+    const imageBuffer = await image.arrayBuffer()
+    const imageBuff = Buffer.from(imageBuffer)
+
+    const imageResult = await new Promise<UploadApiResponse>(
+      (resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'geology/articles',
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error || !result) {
+              return reject(error || new Error('Upload failed'))
+            }
+            resolve(result)
+          },
+        )
+        stream.end(imageBuff)
+      },
+    )
+
+    imageUrl = imageResult.secure_url
+  }
+
+  await prisma.article.update({
+    where: { id },
+    data: {
+      title,
+      long_desc,
+      short_desc,
+      slug,
+      featured,
+      image: imageUrl,
     },
   })
 
-  redirect('/control/scheme')
+  revalidatePath(`/control/articles/${slug}`)
+  redirect(`/control/articles/${slug}?success=true`)
+}
+
+export const createCategory = async (formData: FormData) => {
+  const title = formData.get('title') as string
+  const long_desc = formData.get('long_desc') as string
+  const featured = formData.get('featured') === 'on'
+
+  if (!title || !long_desc) {
+    throw new Error('All fields are required')
+  }
+
+  await prisma.category.create({
+    data: {
+      title,
+      long_desc,
+      featured,
+    },
+  })
+
+  revalidatePath('/control/categories/create')
+  redirect('/control/categories/create?success=true')
+}
+
+export const updateCategory = async (formData: FormData) => {
+  const title = formData.get('title') as string
+  const long_desc = formData.get('long_desc') as string
+  const featured = formData.get('featured') === 'on'
+  const id = formData.get('id') as string
+  const display_order = formData.get('display_order')
+
+  const order = typeof display_order === 'string' ? Number(display_order) : 0
+
+  if (!title) {
+    throw new Error('Title is required')
+  }
+
+  await prisma.category.update({
+    where: {
+      id,
+    },
+    data: {
+      title,
+      long_desc,
+      featured,
+      display_order: order,
+    },
+  })
+
+  revalidatePath(`/control/categories/${id}`)
+  redirect(`/control/categories/${id}?success=true`)
+}
+
+export const getSingleCategory = async (id: string) => {
+  return await prisma.category.findUnique({
+    where: {
+      id,
+    },
+  })
+}
+
+export const getALlCategories = async () => {
+  return await prisma.category.findMany({
+    orderBy: {
+      display_order: 'desc',
+    },
+    include: {
+      items: true,
+    },
+  })
+}
+
+export const getAllItems = async () => {
+  return await prisma.item.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      category: true,
+    },
+  })
+}
+
+export const getItem = async (id: string) => {
+  if (!id) {
+    throw new Error('Slug is required to fetch an item')
+  }
+
+  return await prisma.item.findUnique({
+    where: { slug: id },
+    include: { category: true, subItem: true },
+  })
+}
+
+export const deleteItem = async (formData: FormData) => {
+  const id = formData.get('id') as string | number
+
+  await prisma.item.delete({
+    where: {
+      id: id as string,
+    },
+  })
+  revalidatePath('/control/categories/items')
+  redirect('/control/categories/items?success=true')
+}
+
+export const deleteCategory = async (formData: FormData) => {
+  const id = formData.get('id') as string | number
+
+  await prisma.category.delete({
+    where: {
+      id: id as string,
+    },
+  })
+  revalidatePath('/control/categories')
+  redirect('/control/categories?success=true')
+}
+
+export const createItem = async (formData: FormData) => {
+  const title = formData.get('title') as string
+  const short_desc = formData.get('short_desc') as string
+  const long_desc = formData.get('long_desc') as string
+  const image = formData.get('image') as File
+  const slug = formData.get('slug') as string
+  const categoryId = formData.get('categoryId') as string
+
+  if (!title || !image || !slug || !categoryId) {
+    throw new Error('All fields are required')
+  }
+  const imageBuffer = await image.arrayBuffer()
+  const imageBuff = Buffer.from(imageBuffer)
+  const imageResult = await new Promise<UploadApiResponse>(
+    (resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'geology/items',
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error || !result) {
+            return reject(error || new Error('Upload failed'))
+          }
+          resolve(result)
+        },
+      )
+      stream.end(imageBuff)
+    },
+  )
+  await prisma.item.create({
+    data: {
+      title,
+      long_desc,
+      short_desc,
+      slug,
+      category: {
+        connect: {
+          id: categoryId,
+        },
+      },
+      image: imageResult.secure_url,
+    },
+  })
+  redirect(`/control/categories/items/create?success=true`)
+}
+
+export const updateItem = async (formData: FormData) => {
+  const id = formData.get('id') as string
+  const title = formData.get('title') as string
+  const short_desc = formData.get('short_desc') as string
+  const long_desc = formData.get('long_desc') as string
+  const image = formData.get('image') as File | null
+  const slug = formData.get('slug') as string
+  const categoryId = formData.get('categoryId') as string
+
+  const existingItem = await prisma.item.findUnique({
+    where: { id },
+  })
+
+  if (!existingItem) throw new Error('Article not found')
+
+  let imageUrl = existingItem.image
+
+  if (image && image.size > 0) {
+    const imageBuffer = await image.arrayBuffer()
+    const imageBuff = Buffer.from(imageBuffer)
+
+    const imageResult = await new Promise<UploadApiResponse>(
+      (resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'geology/items',
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error || !result) {
+              return reject(error || new Error('Upload failed'))
+            }
+            resolve(result)
+          },
+        )
+        stream.end(imageBuff)
+      },
+    )
+
+    imageUrl = imageResult.secure_url
+  }
+
+  await prisma.item.update({
+    where: { id },
+    data: {
+      title,
+      long_desc,
+      short_desc,
+      slug,
+      category: {
+        connect: {
+          id: categoryId,
+        },
+      },
+      image: imageUrl,
+    },
+  })
+
+  revalidatePath(`/control/categories/items/${slug}`)
+  redirect(`/control/categories/items/${slug}?success=true`)
+}
+
+type EarthquakeFeature = {
+  id: string
+  properties: {
+    mag: number
+    place: string
+    time: number
+  }
+}
+
+export const getEarthQuakes = async () => {
+  const response = await fetch(
+    'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=6&orderby=time',
+    { cache: 'no-store' },
+  )
+  const data: { features: EarthquakeFeature[] } = await response.json()
+
+  return data.features.map((quake) => ({
+    id: quake.id,
+    magnitude: quake.properties.mag,
+    location: quake.properties.place,
+    time: quake.properties.time,
+  }))
+}
+
+export const createSubItem = async (formData: FormData) => {
+  const title = formData.get('title') as string
+  const short_desc = formData.get('short_desc') as string
+  const long_desc = formData.get('long_desc') as string
+  const image = formData.get('image') as File
+  const slug = formData.get('slug') as string
+  const itemId = formData.get('itemId') as string
+
+  if (!title || !image || !slug || !itemId) {
+    throw new Error('All fields are required')
+  }
+  const imageBuffer = await image.arrayBuffer()
+  const imageBuff = Buffer.from(imageBuffer)
+  const imageResult = await new Promise<UploadApiResponse>(
+    (resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'geology/items',
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error || !result) {
+            return reject(error || new Error('Upload failed'))
+          }
+          resolve(result)
+        },
+      )
+      stream.end(imageBuff)
+    },
+  )
+  await prisma.subItem.create({
+    data: {
+      title,
+      long_desc,
+      short_desc,
+      slug,
+      item: {
+        connect: {
+          id: itemId,
+        },
+      },
+      image: imageResult.secure_url,
+    },
+  })
+  redirect(`/control/sub-items/create?success=true`)
+}
+
+export const getAllSubItems = async () => {
+  return await prisma.subItem.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      item: true,
+    },
+  })
+}
+
+export const deleteSubItem = async (formData: FormData) => {
+  const id = formData.get('id') as string | number
+
+  await prisma.subItem.delete({
+    where: {
+      id: id as string,
+    },
+  })
+  revalidatePath('/control/sub-items')
+  redirect('/control/sub-items?success=true')
+}
+
+export const getSubItem = async (id: string) => {
+  if (!id) {
+    throw new Error('Slug is required to fetch an item')
+  }
+
+  return await prisma.subItem.findUnique({
+    where: { slug: id },
+    include: { item: true },
+  })
 }
