@@ -11,10 +11,8 @@ export default function Navbar() {
   const links = [
     { name: 'EXPLORE', href: '/explore' },
     { name: 'ARTICLES', href: '/blog' },
-    { name: 'DOCUMENTATION', href: '#' },
     { name: 'CONTACT', href: '/contact' },
     { name: 'Real Time Data', href: '/real-time-data' },
-    { name: 'OPTIMIZATION', href: '#' },
   ]
 
   return (
@@ -36,7 +34,7 @@ export default function Navbar() {
           </div>
 
           <div className='navbar-start hidden lg:flex gap-4'>
-            {links.slice(0, 3).map((link) => (
+            {links.slice(0, 2).map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -76,7 +74,7 @@ export default function Navbar() {
           </div>
 
           <div className='navbar-end hidden lg:flex gap-4'>
-            {links.slice(3).map((link) => (
+            {links.slice(2).map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
