@@ -1,6 +1,10 @@
 import HelpSection from '@/components/HelpSection'
-import React from 'react'
+import React, { Suspense } from 'react'
 
-export default function page() {
-  return <HelpSection />
+export default function Page() {
+  return (
+    <Suspense fallback={<div className='min-h-screen bg-black' />}>
+      <HelpSection />
+    </Suspense>
+  )
 }
