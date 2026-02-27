@@ -120,7 +120,7 @@ export default function EarthQuakeMap() {
   )
 
   return (
-    <div className='flex flex-col h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans selection:bg-teal-500/30'>
+    <div className='flex flex-col h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans selection:bg-teal-500/30 py-28'>
       <header className='px-6 py-8 border-b border-white/5 bg-gradient-to-b from-neutral-900 to-transparent'>
         <div className='max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4'>
           <div>
