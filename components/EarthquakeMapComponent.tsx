@@ -124,7 +124,7 @@ export default function EarthQuakeMap() {
       <header className='px-6 py-8 border-b border-white/5 bg-gradient-to-b from-neutral-900 to-transparent'>
         <div className='max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4'>
           <div>
-            <h1 className='text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-500 uppercase'>
+            <h1 className='text-4xl font-black tracking-tighter text-white  uppercase'>
               Seismic Monitor
             </h1>
             <p className='text-xs font-medium tracking-[0.2em] text-teal-400 uppercase mt-1'>
