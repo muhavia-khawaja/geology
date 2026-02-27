@@ -14,8 +14,8 @@ export default function AboutPage() {
         </h2>
         <p className='text-gray-600 dark:text-gray-400'>
           Geology is a comprehensive platform dedicated to the study and
-          exploration of Earth's physical structure, substances, history, and
-          processes. Our mission is to provide accurate and up-to-date
+          exploration of Earth&apos;s physical structure, substances, history,
+          and processes. Our mission is to provide accurate and up-to-date
           geological information to enthusiasts, researchers, and professionals
           in the field.
         </p>
