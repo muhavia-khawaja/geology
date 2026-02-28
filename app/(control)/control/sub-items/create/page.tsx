@@ -24,7 +24,7 @@ export default async function Page({
 
   return (
     <div className='max-w-6xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700'>
-      {/* --- SYSTEM HEADER --- */}
+      
       <div className='flex items-center justify-between mb-12'>
         <div className='flex items-center gap-6'>
           <Link 
@@ -53,11 +53,11 @@ export default async function Page({
 
       <form action={createSubItem} className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
         
-        {/* --- MAIN COLUMN: NODE CONTENT --- */}
+        
         <div className='lg:col-span-2 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 lg:p-12 rounded-[2.5rem] shadow-2xl space-y-10'>
             
-            {/* Title */}
+            
             <div className='space-y-4'>
               <div className='flex items-center gap-2'>
                 <Type size={14} className='text-[#6A1E55]' />
@@ -72,7 +72,7 @@ export default async function Page({
               />
             </div>
 
-            {/* Slug */}
+            
             <div className='space-y-4'>
               <div className='flex items-center gap-2'>
                 <Fingerprint size={14} className='text-[#6A1E55]' />
@@ -87,7 +87,7 @@ export default async function Page({
               />
             </div>
 
-            {/* Descriptions */}
+            
             <div className='space-y-8'>
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
@@ -118,11 +118,11 @@ export default async function Page({
           </div>
         </div>
 
-        {/* --- SIDEBAR: RELATIONAL MAPPING --- */}
+        
         <div className='lg:col-span-1 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 rounded-[3rem] space-y-8 sticky top-28'>
             
-            {/* Parent Link */}
+            
             <div className='space-y-4'>
               <div className='flex items-center gap-2 text-white/30'>
                 <Link2 size={14} />
@@ -137,7 +137,7 @@ export default async function Page({
                   <option value=''>Map to Primary Asset...</option>
                   {items.map((item: any) => (
                     <option key={item.id} value={item.id} className='bg-[#0D0D0F]'>
-                      {item.title.toUpperCase()} // {item.category.title}
+                      {item.title.toUpperCase()} | {item.category.title}
                     </option>
                   ))}
                 </select>
@@ -147,7 +147,7 @@ export default async function Page({
               </div>
             </div>
 
-            {/* Visual Asset */}
+            
             <div className='space-y-4'>
               <div className='flex items-center gap-2 text-white/30'>
                 <ImageIcon size={14} />
