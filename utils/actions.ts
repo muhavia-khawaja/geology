@@ -743,3 +743,39 @@ export const getSubItem = async (id: string) => {
     include: { item: true },
   })
 }
+
+export const updateSubItem = async (formData: FormData) => {
+  const id = formData.get('id') as string
+  const title = formData.get('title') as string
+  const slug = formData.get('slug') as string
+  const short_desc = formData.get('short_desc') as string
+  const long_desc = formData.get('long_desc') as string
+  const itemId = formData.get('itemId') as string
+  const image = formData.get('image') as File
+
+  const existingSubItem = await prisma.subItem.findUnique({
+    where: { id },
+  })
+
+  if (!existingSubItem) throw new Error('Sub-Node not found in registry.')
+
+  let imageUrl = existingSubItem.image
+
+  if (image && image.size > 0) {
+  }
+
+  const updatedSubItem = await prisma.subItem.update({
+    where: { id },
+    data: {
+      title,
+      slug,
+      short_desc,
+      long_desc,
+      itemId,
+      image: imageUrl,
+    },
+  })
+
+  revalidatePath('/control/sub-items')
+  redirect(`/control/sub-items/${updatedSubItem.slug}?success=true`)
+}

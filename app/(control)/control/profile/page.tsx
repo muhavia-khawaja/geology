@@ -2,6 +2,17 @@ import SuccessToast from '@/components/SuccessToast'
 import { getAdmin, updateAdmin } from '@/utils/actions'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import {
+  User,
+  Mail,
+  Lock,
+  ShieldCheck,
+  AlertCircle,
+  RefreshCcw,
+  Fingerprint,
+  KeyRound,
+} from 'lucide-react'
+import Link from 'next/link'
 
 type Props = {
   searchParams?: {
@@ -11,119 +22,153 @@ type Props = {
 }
 
 export default async function Page({ searchParams }: Props) {
-  const success = searchParams?.success
+  const success = searchParams?.success === 'true'
   const error = searchParams?.error
   const token = cookies().get('token')?.value
 
-  if (!token) {
-    redirect('/login')
-  }
+  if (!token) redirect('/login')
 
   const admin = await getAdmin(token)
-
-  if (!admin) {
-    redirect('/login')
-  }
+  if (!admin) redirect('/login')
 
   return (
-    <div className='min-h-screen bg-black flex items-center justify-center px-6'>
-      <div className='w-full max-w-3xl'>
-        <div className='bg-[#0f0f0f] border border-[#1f1f1f] rounded-xl p-10 shadow-[0_0_20px_rgba(34,197,94,0.08)]'>
-          <div className='mb-10 text-center'>
-            <h2 className='text-3xl font-bold text-white tracking-wide'>
-              Update Profile
-            </h2>
-            <p className='text-sm text-gray-400 mt-2'>
-              Update your account information
-            </p>
-            <div className='w-16 h-[2px] bg-green-400 mx-auto mt-4 opacity-70' />
+    <div className='max-w-4xl mx-auto py-12 px-6 animate-in fade-in slide-in-from-bottom-4 duration-700'>
+      <div className='text-center mb-12'>
+        <div className='inline-flex p-4 rounded-full bg-[#6A1E55]/10 border border-[#6A1E55]/20 mb-4'>
+          <Fingerprint size={32} className='text-[#6A1E55]' />
+        </div>
+        <h2 className='text-3xl font-black italic text-white tracking-tighter uppercase'>
+          Admin_<span className='text-[#6A1E55]'>Profile</span>
+        </h2>
+        <p className='text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mt-2'>
+          Update System Authorization // User_ID: {admin.id.slice(0, 8)}
+        </p>
+      </div>
 
-            {success && (
-              <SuccessToast
-                text='Updated Successfully'
-                url='/control/profile'
-              />
-            )}
+      <div className='bg-[#0D0D0F] border border-white/5 rounded-[3rem] p-8 md:p-12 shadow-2xl relative overflow-hidden'>
+        <div className='absolute top-0 right-0 p-8 opacity-5 select-none pointer-events-none'>
+          <ShieldCheck size={120} />
+        </div>
 
-            {error && (
-              <div className='my-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 shadow-md'>
-                <div className='flex items-start gap-3'>
-                  <div className='flex-1'>
-                    <h4 className='text-red-400 font-semibold text-sm'>
-                      Update Failed
-                    </h4>
-                    <p className='text-red-300 text-sm mt-1'>
-                      {error === 'password-short' &&
-                        'Password must be at least 6 characters.'}
-                      {error === 'missing-fields' &&
-                        'Name and Email are required.'}
-                      {error === 'invalid-email' &&
-                        'Please enter a valid email address.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+        {success && (
+          <SuccessToast
+            text='Identity Parameters Synchronized'
+            url='/control/profile'
+          />
+        )}
+
+        {error && (
+          <div className='mb-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-4 animate-shake'>
+            <div className='flex items-center gap-3 text-red-400'>
+              <AlertCircle size={18} />
+              <p className='text-[10px] font-black uppercase tracking-widest'>
+                {error === 'password-short' &&
+                  'Validation Error: Password length < 6'}
+                {error === 'missing-fields' &&
+                  'Validation Error: Required fields null'}
+                {error === 'invalid-email' &&
+                  'Protocol Error: Invalid Email Format'}
+              </p>
+            </div>
           </div>
+        )}
 
-          <form className='space-y-7' action={updateAdmin}>
-            <input type='hidden' name='id' value={admin.id} />
+        <form
+          className='grid grid-cols-1 md:grid-cols-2 gap-10'
+          action={updateAdmin}
+        >
+          <input type='hidden' name='id' value={admin.id} />
 
-            <div>
-              <label className='block text-sm text-gray-400 mb-2'>Name</label>
+          <div className='space-y-8'>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-white/30'>
+                <User size={14} className='text-[#6A1E55]' />
+                <span className='text-[10px] font-black uppercase tracking-widest'>
+                  Identity_Name
+                </span>
+              </div>
               <input
                 type='text'
                 defaultValue={admin.name}
                 name='name'
-                className='w-full bg-black border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition'
+                className='w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:outline-none focus:border-[#6A1E55] transition-all'
               />
             </div>
 
-            <div>
-              <label className='block text-sm text-gray-400 mb-2'>Email</label>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-white/30'>
+                <Mail size={14} className='text-[#6A1E55]' />
+                <span className='text-[10px] font-black uppercase tracking-widest'>
+                  Access_Email
+                </span>
+              </div>
               <input
                 type='email'
                 defaultValue={admin.email}
                 name='email'
-                className='w-full bg-black border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition'
+                className='w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:outline-none focus:border-[#6A1E55] transition-all'
               />
             </div>
+          </div>
 
-            <div>
-              <label className='block text-sm text-gray-400 mb-2'>
-                New Password
-              </label>
+          <div className='space-y-8 bg-white/[0.02] p-8 rounded-[2rem] border border-white/[0.03]'>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-white/30'>
+                <Lock size={14} className='text-[#6A1E55]' />
+                <span className='text-[10px] font-black uppercase tracking-widest'>
+                  Secure_Key
+                </span>
+              </div>
               <input
                 type='password'
                 name='password'
-                placeholder='Enter new password'
-                className='w-full bg-black border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition'
+                placeholder='Enter new key...'
+                className='w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-sm font-mono text-[#A64D79] focus:outline-none focus:border-[#6A1E55] transition-all'
               />
             </div>
 
-            <div className='form-control'>
-              <label className='label cursor-pointer justify-start gap-4'>
+            <label className='flex items-center gap-4 group cursor-pointer'>
+              <div className='relative flex items-center'>
                 <input
                   type='checkbox'
                   name='updatePassword'
-                  className='checkbox checkbox-primary'
+                  className='peer h-6 w-6 opacity-0 absolute cursor-pointer'
                 />
-                <span className='label-text text-gray-400'>
-                  Check to update password
-                </span>
-              </label>
-            </div>
+                <div className='h-6 w-6 border-2 border-white/10 rounded-lg peer-checked:bg-[#6A1E55] peer-checked:border-[#6A1E55] transition-all flex items-center justify-center'>
+                  <KeyRound
+                    size={12}
+                    className='text-white scale-0 peer-checked:scale-100 transition-transform'
+                  />
+                </div>
+              </div>
+              <span className='text-[10px] font-black text-white/30 uppercase tracking-widest group-hover:text-white/60 transition-colors'>
+                Authorize Key Update
+              </span>
+            </label>
+          </div>
 
-            <div className='flex justify-end pt-6'>
-              <button
-                type='submit'
-                className='px-6 py-2 rounded-md bg-green-500/90 text-black font-semibold hover:bg-green-400 transition shadow-[0_0_12px_rgba(34,197,94,0.25)]'
-              >
-                Update
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className='md:col-span-2 pt-6 border-t border-white/5'>
+            <button
+              type='submit'
+              className='w-full py-5 rounded-2xl bg-[#6A1E55] hover:bg-[#A64D79] text-white font-black text-[10px] uppercase tracking-[0.4em] transition-all shadow-xl shadow-[#6A1E55]/20 flex items-center justify-center gap-4 group'
+            >
+              <RefreshCcw
+                size={18}
+                className='group-hover:rotate-180 transition-transform duration-700'
+              />
+              Commit Identity Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className='mt-8 text-center'>
+        <Link
+          href='/control'
+          className='text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-[#A64D79] transition-colors'
+        >
+          Return to Main Terminal
+        </Link>
       </div>
     </div>
   )

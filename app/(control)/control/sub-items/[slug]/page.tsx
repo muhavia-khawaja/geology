@@ -1,5 +1,5 @@
 import SuccessToast from '@/components/SuccessToast'
-import { getALlCategories, getItem, updateItem } from '@/utils/actions'
+import { getAllItems, getSubItem, updateSubItem } from '@/utils/actions'
 import {
   Save,
   ArrowLeft,
@@ -7,10 +7,10 @@ import {
   Fingerprint,
   FileText,
   Image as ImageIcon,
-  Tag,
   Database,
   ShieldCheck,
   RefreshCw,
+  Layers,
 } from 'lucide-react'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
@@ -26,106 +26,106 @@ type Props = {
   }
 }
 
-export default async function page({ params, searchParams }: Props) {
-  const categories = await getALlCategories()
-  const item = await getItem(params.slug)
+export default async function Page({ params, searchParams }: Props) {
+  const items = await getAllItems()
+  const subItem = await getSubItem(params.slug)
   const success = searchParams.success === 'true'
 
-  if (!item) return notFound()
+  if (!subItem) return notFound()
 
   return (
     <div className='max-w-6xl mx-auto pb-20 animate-in fade-in duration-500'>
       <div className='flex items-center justify-between mb-12'>
         <div className='flex items-center gap-6'>
           <Link
-            href='/control/categories/items'
+            href='/control/sub-items'
             className='p-3 bg-white/5 border border-white/10 rounded-2xl text-white/40 hover:text-white hover:border-[#6A1E55] transition-all'
           >
             <ArrowLeft size={20} />
           </Link>
           <div>
             <h2 className='text-3xl font-black italic text-white tracking-tighter uppercase'>
-              Calibrate <span className='text-[#6A1E55]'>Asset_Node</span>
+              Calibrate <span className='text-[#6A1E55]'>Sub_Node</span>
             </h2>
             <p className='text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mt-1'>
-              Refining Sub-Sector Intelligence // UID: {item.id.slice(0, 8)}
+              Refining Nested Intelligence // UID: {subItem.id.slice(0, 8)}
             </p>
           </div>
         </div>
 
         {success && (
           <SuccessToast
-            text='Asset Intelligence Synchronized'
-            url={`/control/categories/items/${params.slug}`}
+            text='Sub-Node Intelligence Synchronized'
+            url={`/control/sub-items/${params.slug}`}
           />
         )}
       </div>
 
       <form
-        action={updateItem}
+        action={updateSubItem}
         className='grid grid-cols-1 lg:grid-cols-3 gap-8'
       >
-        <input type='hidden' name='id' value={item.id} />
+        <input type='hidden' name='id' value={subItem.id} />
 
         <div className='lg:col-span-2 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 lg:p-12 rounded-[2.5rem] shadow-2xl space-y-12'>
             <div className='space-y-4'>
-              <div className='flex items-center gap-2'>
+              <div className='flex items-center gap-2 text-white/30'>
                 <Type size={14} className='text-[#6A1E55]' />
-                <span className='text-[10px] font-black text-white/30 uppercase tracking-[0.2em]'>
-                  Asset_Label
+                <span className='text-[10px] font-black uppercase tracking-[0.2em]'>
+                  Node_Label
                 </span>
               </div>
               <input
                 type='text'
                 name='title'
-                defaultValue={item.title}
+                defaultValue={subItem.title}
                 className='w-full bg-transparent border-b border-white/10 py-4 text-3xl font-black text-white focus:outline-none focus:border-[#6A1E55] transition-all tracking-tight'
               />
             </div>
 
             <div className='space-y-4'>
-              <div className='flex items-center gap-2'>
+              <div className='flex items-center gap-2 text-white/30'>
                 <Fingerprint size={14} className='text-[#6A1E55]' />
-                <span className='text-[10px] font-black text-white/30 uppercase tracking-[0.2em]'>
+                <span className='text-[10px] font-black uppercase tracking-[0.2em]'>
                   Access_Slug
                 </span>
               </div>
               <input
                 type='text'
                 name='slug'
-                defaultValue={item.slug}
+                defaultValue={subItem.slug}
                 className='w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-mono text-[#A64D79] focus:outline-none focus:border-[#6A1E55] transition-all'
               />
             </div>
 
             <div className='space-y-8'>
               <div className='space-y-4'>
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 text-white/30'>
                   <FileText size={14} className='text-[#6A1E55]' />
-                  <span className='text-[10px] font-black text-white/30 uppercase tracking-[0.2em]'>
-                    Executive_Summary
+                  <span className='text-[10px] font-black uppercase tracking-[0.2em]'>
+                    Node_Abstract
                   </span>
                 </div>
                 <textarea
                   name='short_desc'
                   rows={2}
-                  defaultValue={item.short_desc}
+                  defaultValue={subItem.short_desc}
                   className='w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm text-white/70 focus:outline-none focus:border-[#6A1E55]'
                 />
               </div>
 
               <div className='space-y-4'>
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 text-white/30'>
                   <Database size={14} className='text-[#6A1E55]' />
-                  <span className='text-[10px] font-black text-white/30 uppercase tracking-[0.2em]'>
-                    Deep_Data_Manifest
+                  <span className='text-[10px] font-black uppercase tracking-[0.2em]'>
+                    Extended_Manifest
                   </span>
                 </div>
                 <textarea
                   name='long_desc'
                   rows={8}
-                  defaultValue={item.long_desc}
+                  defaultValue={subItem.long_desc}
                   className='w-full bg-white/[0.03] border border-white/10 rounded-3xl px-6 py-5 text-sm text-white/80 focus:outline-none focus:border-[#6A1E55] leading-relaxed'
                 />
               </div>
@@ -144,9 +144,9 @@ export default async function page({ params, searchParams }: Props) {
               </div>
               <div className='relative aspect-square w-full rounded-3xl overflow-hidden border border-white/10 bg-black shadow-inner group'>
                 <Image
-                  src={item.image}
+                  src={subItem.image}
                   fill
-                  alt={item.title}
+                  alt={subItem.title}
                   className='object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-700'
                 />
                 <div className='absolute inset-0 bg-gradient-to-t from-[#0D0D0F] to-transparent' />
@@ -160,22 +160,22 @@ export default async function page({ params, searchParams }: Props) {
 
             <div className='space-y-4'>
               <div className='flex items-center gap-2 text-white/30'>
-                <Tag size={14} />
+                <Layers size={14} />
                 <span className='text-[10px] font-black uppercase tracking-widest'>
-                  Classification_Sector
+                  Parent_Association
                 </span>
               </div>
               <select
-                name='categoryId'
-                className='w-full bg-black border border-white/10 rounded-2xl px-4 py-4 text-xs font-bold text-white focus:border-[#6A1E55] outline-none'
+                name='itemId'
+                className='w-full bg-black border border-white/10 rounded-2xl px-4 py-4 text-xs font-bold text-white focus:border-[#6A1E55] outline-none cursor-pointer'
               >
-                {categories.map((cat: any) => (
+                {items.map((parent: any) => (
                   <option
-                    key={cat.id}
-                    value={cat.id}
-                    selected={cat.id === item.categoryId}
+                    key={parent.id}
+                    value={parent.id}
+                    selected={parent.id === subItem.itemId}
                   >
-                    {cat.title}
+                    {parent.title.toUpperCase()}
                   </option>
                 ))}
               </select>
@@ -184,19 +184,19 @@ export default async function page({ params, searchParams }: Props) {
             <div className='pt-6 border-t border-white/5 space-y-4'>
               <button
                 type='submit'
-                className='w-full py-5 rounded-2xl bg-[#6A1E55] hover:bg-[#A64D79] text-white font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl shadow-[#6A1E55]/20 flex items-center justify-center gap-3 active:scale-95'
+                className='w-full py-5 rounded-2xl bg-[#6A1E55] hover:bg-[#A64D79] text-white font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl shadow-[#6A1E55]/20 flex items-center justify-center gap-3 active:scale-95 group'
               >
                 <RefreshCw
                   size={18}
                   className='group-hover:rotate-180 transition-transform duration-700'
                 />
-                Update Asset
+                Re-Sync Node
               </button>
 
               <div className='flex items-center gap-3 justify-center opacity-20'>
                 <ShieldCheck size={12} />
                 <span className='text-[8px] font-black uppercase tracking-[0.2em]'>
-                  Protocol integrity Verified
+                  Verified Calibration
                 </span>
               </div>
             </div>

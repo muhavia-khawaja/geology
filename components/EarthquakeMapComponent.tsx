@@ -9,60 +9,61 @@ import {
   LayersControl,
   useMap,
 } from 'react-leaflet'
+// @ts-ignore
 import 'leaflet/dist/leaflet.css'
+import {
+  Activity,
+  RefreshCw,
+  ChevronRight,
+  Search,
+  BarChart3,
+  Waves,
+  Clock,
+  Calendar,
+  Navigation2,
+} from 'lucide-react'
+import Link from 'next/link'
 
-// --- Types ---
-interface EarthquakeProperties {
-  mag: number
-  place: string
-  time: number
-}
-interface EarthquakeGeometry {
-  coordinates: [number, number, number]
-}
 interface EarthquakeFeature {
   id: string
-  properties: EarthquakeProperties
-  geometry: EarthquakeGeometry
-}
-interface EarthquakeResponse {
-  features: EarthquakeFeature[]
-}
-
-function FlyToLocation({ coords }: { coords: [number, number] }) {
-  const map = useMap()
-  useEffect(() => {
-    if (coords) map.flyTo(coords, 6, { duration: 1.5, easeLinearity: 0.25 })
-  }, [coords, map])
-  return null
+  properties: { mag: number; place: string; time: number; depth: number }
+  geometry: { coordinates: [number, number, number] }
 }
 
 export default function EarthQuakeMap() {
   const [quakes, setQuakes] = useState<EarthquakeFeature[]>([])
-  const [selected, setSelected] = useState<EarthquakeFeature | null>(null)
   const [loading, setLoading] = useState(false)
-  const [from, setFrom] = useState<string>('')
-  const [to, setTo] = useState<string>('')
 
-  const MAX_DISPLAY = 40
+  const [searchQuery, setSearchQuery] = useState('')
+  const [minMag, setMinMag] = useState(4.0)
+  const [maxDepth, setMaxDepth] = useState(700)
+  const [startDate, setStartDate] = useState(
+    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  )
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
+  const [selected, setSelected] = useState<EarthquakeFeature | null>(null)
+
+  const colors = {
+    richBlack: '#1A1A1D',
+    deepPlum: '#3B1C32',
+    vividPurple: '#6A1E55',
+    roseDust: '#A64D79',
+  }
 
   const fetchQuakes = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (from) params.append('starttime', from)
-      if (to) params.append('endtime', to)
-      params.append('format', 'geojson')
-      params.append('minmagnitude', '2.5')
-      const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?${params.toString()}`
-      const res = await fetch(url)
-      const data: EarthquakeResponse = await res.json()
-      const sorted = data.features.sort(
-        (a, b) => b.properties.time - a.properties.time,
+      const res = await fetch(
+        `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startDate}&endtime=${endDate}&minmagnitude=2.5&limit=300`,
       )
-      setQuakes(sorted.slice(0, MAX_DISPLAY))
+      const data = await res.json()
+      const formatted = data.features.map((f: any) => ({
+        ...f,
+        properties: { ...f.properties, depth: f.geometry.coordinates[2] },
+      }))
+      setQuakes(formatted)
     } catch (err) {
-      console.error('Failed to fetch USGS data', err)
+      console.error('Link Failure:', err)
     } finally {
       setLoading(false)
     }
@@ -70,173 +71,195 @@ export default function EarthQuakeMap() {
 
   useEffect(() => {
     fetchQuakes()
-    const interval = setInterval(fetchQuakes, 120000)
-    return () => clearInterval(interval)
-  }, [from, to])
+  }, [])
 
-  const getColor = (mag: number) => {
-    if (mag >= 6) return '#f43f5e'
-    if (mag >= 5) return '#fb923c'
-    if (mag >= 4) return '#fbbf24'
-    return '#2dd4bf'
-  }
-
-  const markers = useMemo(
-    () =>
-      quakes.map((quake) => {
-        const [lng, lat] = quake.geometry.coordinates
-        const mag = quake.properties.mag
-        const isSelected = selected?.id === quake.id
-        return (
-          <CircleMarker
-            key={quake.id}
-            center={[lat, lng]}
-            radius={isSelected ? mag * 5 : mag * 3}
-            pathOptions={{
-              color: isSelected ? '#ffffff' : getColor(mag),
-              fillColor: getColor(mag),
-              fillOpacity: isSelected ? 0.8 : 0.4,
-              weight: isSelected ? 3 : 1.5,
-            }}
-            eventHandlers={{ click: () => setSelected(quake) }}
-          >
-            <Popup className='dark-popup'>
-              <div className='p-1 text-slate-200'>
-                <h3 className='font-bold text-sm mb-1'>
-                  {quake.properties.place}
-                </h3>
-                <div className='flex justify-between text-xs opacity-80'>
-                  <span>Mag: {mag.toFixed(1)}</span>
-                  <span>
-                    {new Date(quake.properties.time).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </Popup>
-          </CircleMarker>
-        )
-      }),
-    [quakes, selected],
-  )
+  const filteredQuakes = useMemo(() => {
+    return quakes
+      .filter((q) => {
+        const matchesSearch = q.properties.place
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+        const matchesMag = q.properties.mag >= minMag
+        const matchesDepth = q.properties.depth <= maxDepth
+        return matchesSearch && matchesMag && matchesDepth
+      })
+      .slice(0, 100)
+  }, [quakes, searchQuery, minMag, maxDepth])
 
   return (
-    <div className='flex flex-col h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans selection:bg-teal-500/30 py-28'>
-      <header className='px-6 py-8 border-b border-white/5 bg-gradient-to-b from-neutral-900 to-transparent'>
-        <div className='max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4'>
-          <div>
-            <h1 className='text-4xl font-black tracking-tighter text-white  uppercase'>
-              Seismic Monitor
+    <div className='flex flex-col h-screen w-full bg-[#0D0D0F] text-slate-200 overflow-hidden font-sans pt-16'>
+      <header className='px-8 py-4 border-b border-white/5 bg-[#0D0D0F] z-30 shadow-2xl'>
+        <div className='flex flex-col xl:flex-row xl:items-center justify-between gap-6'>
+          <div className='flex items-center gap-4'>
+            <div className='p-2 rounded-lg bg-vivid-purple/10 border border-vivid-purple/20'>
+              <Activity className='w-6 h-6 text-rose-dust' />
+            </div>
+            <h1 className='text-lg font-black tracking-tighter text-white uppercase'>
+              Seismic<span className='text-vivid-purple'>Scan_V2</span>
             </h1>
-            <p className='text-xs font-medium tracking-[0.2em] text-teal-400 uppercase mt-1'>
-              Live Global Activity Report
-            </p>
           </div>
 
-          <div className='flex items-center gap-3 bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md'>
-            <div className='flex flex-col px-2'>
-              <span className='text-[10px] uppercase opacity-40 font-bold'>
-                Start Range
-              </span>
+          <div className='flex flex-wrap items-center gap-3 bg-white/[0.02] p-2 rounded-2xl border border-white/5'>
+            <div className='relative group border-r border-white/5 pr-3'>
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20' />
               <input
-                type='datetime-local'
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                className='bg-transparent text-xs focus:outline-none'
+                type='text'
+                placeholder='Locality...'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className='bg-black/40 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-[10px] w-32 focus:outline-none focus:border-vivid-purple/50'
               />
             </div>
-            <div className='h-8 w-px bg-white/10' />
+
+            <div className='flex items-center gap-2 border-r border-white/5 pr-3'>
+              <Calendar size={14} className='text-vivid-purple' />
+              <div className='flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/5'>
+                <input
+                  type='date'
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className='bg-transparent text-[9px] font-black uppercase text-white/60 focus:outline-none focus:text-white cursor-pointer'
+                />
+                <span className='text-white/20 text-[10px]'>—</span>
+                <input
+                  type='date'
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className='bg-transparent text-[9px] font-black uppercase text-white/60 focus:outline-none focus:text-white cursor-pointer'
+                />
+              </div>
+            </div>
+
+            <div className='flex items-center gap-4 border-r border-white/5 pr-3'>
+              <div className='flex flex-col'>
+                <span className='text-[7px] font-black text-white/20 uppercase'>
+                  Mag_Gate: {minMag}
+                </span>
+                <input
+                  type='range'
+                  min='2.5'
+                  max='9'
+                  step='0.5'
+                  value={minMag}
+                  onChange={(e) => setMinMag(parseFloat(e.target.value))}
+                  className='w-16 h-1 accent-vivid-purple bg-white/5 rounded-lg appearance-none cursor-pointer'
+                />
+              </div>
+              <div className='flex flex-col'>
+                <span className='text-[7px] font-black text-white/20 uppercase'>
+                  Depth_Max: {maxDepth}km
+                </span>
+                <input
+                  type='range'
+                  min='10'
+                  max='700'
+                  step='50'
+                  value={maxDepth}
+                  onChange={(e) => setMaxDepth(parseInt(e.target.value))}
+                  className='w-16 h-1 accent-rose-dust bg-white/5 rounded-lg appearance-none cursor-pointer'
+                />
+              </div>
+            </div>
+
             <button
               onClick={fetchQuakes}
-              disabled={loading}
-              className='bg-white text-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-teal-400 transition-colors disabled:opacity-50'
+              className='flex items-center gap-2 bg-vivid-purple hover:bg-rose-dust text-white px-4 py-2 rounded-xl text-[9px] font-black tracking-widest transition-all uppercase'
             >
-              {loading ? 'SYNCING...' : 'REFRESH'}
+              <RefreshCw className={`w-3 h-3 ${loading && 'animate-spin'}`} />
+              Sync Data
             </button>
           </div>
         </div>
       </header>
 
-      <div className='flex flex-1 overflow-hidden'>
-        <aside className='w-full md:w-[380px] flex flex-col border-r border-white/5 bg-[#0a0a0a]'>
-          <div className='p-4 flex justify-between items-center bg-white/5'>
-            <span className='text-[10px] font-black tracking-widest uppercase text-neutral-500'>
-              Recent Events ({quakes.length})
+      <div className='flex flex-1 overflow-hidden w-full'>
+        <aside className='hidden md:flex w-[380px] flex-col border-r border-white/5 bg-[#0D0D0F]'>
+          <div className='px-6 py-4 flex justify-between items-center border-b border-white/5'>
+            <span className='text-[9px] font-black tracking-[.3em] uppercase text-white/30'>
+              Event_Log
             </span>
+            <div className='px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-mono text-rose-dust'>
+              {filteredQuakes.length} Nodes
+            </div>
           </div>
 
-          <div className='flex-1 overflow-y-auto custom-scrollbar'>
-            {quakes.map((quake) => {
-              const isSelected = selected?.id === quake.id
-              const color = getColor(quake.properties.mag)
-              return (
-                <div
-                  key={quake.id}
-                  onClick={() => setSelected(quake)}
-                  className={`group relative flex items-center p-4 cursor-pointer border-b border-white/5 transition-all
-                    ${isSelected ? 'bg-teal-500/10' : 'hover:bg-white/[0.02]'}`}
-                >
-                  {isSelected && (
-                    <div className='absolute left-0 w-1 h-full bg-teal-400' />
-                  )}
-
+          <div className='flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2'>
+            {filteredQuakes.map((quake) => (
+              <div
+                key={quake.id}
+                onClick={() => setSelected(quake)}
+                className={`group p-4 cursor-pointer rounded-xl border transition-all duration-300 ${selected?.id === quake.id ? 'bg-vivid-purple/20 border-vivid-purple/50' : 'bg-white/[0.02] border-white/[0.03] hover:border-white/10'}`}
+              >
+                <div className='flex items-center gap-4'>
                   <div
-                    className='w-12 h-12 rounded-full flex items-center justify-center border-2 shrink-0 transition-transform group-hover:scale-110'
-                    style={{ borderColor: `${color}44`, color: color }}
+                    className='text-xs font-black w-10 h-10 rounded-lg flex items-center justify-center bg-black/60 border border-white/5'
+                    style={{
+                      color: quake.properties.mag >= 5 ? '#A64D79' : '#6A1E55',
+                    }}
                   >
-                    <span className='font-black text-sm'>
-                      {quake.properties.mag.toFixed(1)}
-                    </span>
+                    {quake.properties.mag.toFixed(1)}
                   </div>
-
-                  <div className='ml-4 flex-1'>
-                    <div
-                      className={`text-sm font-bold transition-colors ${isSelected ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-200'}`}
-                    >
-                      {quake.properties.place.split('of ').pop()}
-                    </div>
-                    <div className='flex justify-between mt-1 items-center'>
-                      <span className='text-[10px] font-mono opacity-40 uppercase'>
-                        {new Date(quake.properties.time).toLocaleTimeString(
-                          [],
-                          { hour: '2-digit', minute: '2-digit' },
-                        )}
-                      </span>
-                      <span className='text-[10px] px-2 py-0.5 rounded bg-white/5 text-neutral-500'>
-                        {quake.geometry.coordinates[2].toFixed(0)}km
-                      </span>
-                    </div>
+                  <div className='flex-1'>
+                    <h4 className='text-[10px] font-bold text-white uppercase tracking-tight truncate w-48'>
+                      {quake.properties.place}
+                    </h4>
+                    <p className='text-[8px] font-mono text-white/20 mt-1 uppercase'>
+                      {new Date(quake.properties.time).toLocaleDateString()}
+                      {new Date(quake.properties.time).toLocaleTimeString()}
+                    </p>
                   </div>
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         </aside>
 
-        <main className='flex-1 relative bg-neutral-900'>
+        <main className='flex-1 relative'>
           <MapContainer
             center={[20, 0]}
             zoom={3}
-            className='h-full w-full grayscale-[0.5] contrast-[1.1]'
+            className='h-full w-full grayscale-[0.3] brightness-[0.7]'
             zoomControl={false}
           >
-            <TileLayer
-              url='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-              noWrap
-            />
-
-            <LayersControl position='topright'>
-              <LayersControl.Overlay name='Tectonic Plates'>
-                <TileLayer
-                  url='https://earthquake.usgs.gov/basemap/tiles/plates/{z}/{x}/{y}.png'
-                  opacity={0.4}
-                  noWrap
-                />
-              </LayersControl.Overlay>
-            </LayersControl>
-
-            {markers}
-
+            <TileLayer url='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' />
+            {filteredQuakes.map((quake) => {
+              const [lng, lat] = quake.geometry.coordinates
+              const color = quake.properties.mag >= 6 ? '#A64D79' : '#6A1E55'
+              return (
+                <CircleMarker
+                  key={quake.id}
+                  center={[lat, lng]}
+                  radius={quake.properties.mag * 3}
+                  pathOptions={{
+                    color,
+                    fillColor: color,
+                    fillOpacity: 0.4,
+                    weight: 1,
+                  }}
+                  eventHandlers={{ click: () => setSelected(quake) }}
+                >
+                  <Popup className='seismic-popup'>
+                    <div className='p-2 bg-[#0D0D0F]'>
+                      <p className='text-[8px] font-black text-rose-dust uppercase mb-1'>
+                        Mag {quake.properties.mag}
+                      </p>
+                      <p className='text-[10px] font-bold text-white mb-2'>
+                        {quake.properties.depth}km
+                      </p>
+                      <h3 className='text-white text-[10px] font-bold uppercase mb-2'>
+                        {quake.properties.place}
+                      </h3>
+                      <Link
+                        href={`/real-time-data/${quake.id}`}
+                        className='text-[8px] font-black text-vivid-purple uppercase'
+                      >
+                        View Telemetry →
+                      </Link>
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              )
+            })}
             {selected && (
               <FlyToLocation
                 coords={[
@@ -246,53 +269,42 @@ export default function EarthQuakeMap() {
               />
             )}
           </MapContainer>
-
-          <div className='absolute bottom-6 right-6 p-4 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-xl shadow-2xl'>
-            <h4 className='text-[10px] font-black uppercase tracking-widest mb-3 text-neutral-400'>
-              Magnitude Intensity
-            </h4>
-            <div className='flex items-center gap-4'>
-              {[3, 4, 5, 6].map((m) => (
-                <div key={m} className='flex flex-col items-center gap-1'>
-                  <div
-                    className='w-2 rounded-full'
-                    style={{
-                      backgroundColor: getColor(m),
-                      height: `${m * 4}px`,
-                    }}
-                  />
-                  <span className='text-[9px] font-bold'>{m}+</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </main>
       </div>
 
       <style jsx global>{`
         .leaflet-container {
-          background: #050505 !important;
+          background: #0d0d0f !important;
         }
         .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
+          width: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #333;
+          background: #6a1e5533;
           border-radius: 10px;
         }
-        .dark-popup .leaflet-popup-content-wrapper {
-          background: #111 !important;
-          color: white !important;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+        .seismic-popup .leaflet-popup-content-wrapper {
+          background: #0d0d0f !important;
+          border: 1px solid #6a1e55;
           border-radius: 8px;
+          color: white;
         }
-        .dark-popup .leaflet-popup-tip {
-          background: #111 !important;
+        .seismic-popup .leaflet-popup-tip {
+          background: #6a1e55 !important;
+        }
+        input[type='date']::-webkit-calendar-picker-indicator {
+          filter: invert(1) brightness(0.5);
+          cursor: pointer;
         }
       `}</style>
     </div>
   )
+}
+
+function FlyToLocation({ coords }: { coords: [number, number] }) {
+  const map = useMap()
+  useEffect(() => {
+    if (coords) map.flyTo(coords, 5)
+  }, [coords, map])
+  return null
 }

@@ -1,6 +1,6 @@
 import SuccessToast from '@/components/SuccessToast'
 import { deleteArticle, getAllArticles } from '@/utils/actions'
-import { Pen, PenBox, Trash2 } from 'lucide-react'
+import { Pen, PenBox, Trash2, Globe, ShieldCheck, ShieldAlert, Hash } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -13,113 +13,134 @@ export default async function Page({
   const articles = await getAllArticles()
 
   return (
-    <div
-      className='bg-[#0f0f0f] p-8 rounded-2xl border border-[#1c1c1c] 
-                    shadow-[0_0_25px_rgba(34,197,94,0.05)]'
-    >
-      <div className='flex justify-between items-center pr-10 mb-8'>
-        <h2 className='text-2xl font-semibold text-white  tracking-wide'>
-          Articles
-        </h2>
+    <div className='bg-[#0D0D0F] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl'>
+      
+      <div className='p-8 pb-0 flex justify-between items-end'>
+        <div>
+          <h2 className='text-3xl font-black italic text-white tracking-tighter uppercase'>
+            Intelligence <span className='text-[#6A1E55]'>Logs</span>
+          </h2>
+          <p className='text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mt-2'>
+            Registry Database // Sub-surface Articles
+          </p>
+        </div>
 
         <Link
           href='/control/articles/create'
-          className='border border-primary p-2 rounded-full'
+          className='flex items-center gap-3 bg-[#6A1E55] hover:bg-[#A64D79] text-white px-6 py-3 rounded-2xl transition-all group shadow-lg shadow-[#6A1E55]/20'
         >
-          <PenBox className='w-4 h-4 text-white' />
+          <span className='text-[10px] font-black uppercase tracking-widest'>Initialize New Log</span>
+          <PenBox className='w-4 h-4 group-hover:rotate-12 transition-transform' />
         </Link>
       </div>
 
-      <div className='overflow-x-auto'>
-        <table className='w-full text-sm'>
-          <thead>
-            <tr className='text-gray-500 border-b border-gray-800'>
-              <th className='pb-4 text-left'>Image</th>
-              <th className='pb-4 text-left'>Title</th>
-              <th className='pb-4 text-left'>Featured</th>
-              <th className='pb-4 text-left'>Slug</th>
-              <th className='pb-4 text-center'>Action</th>
-            </tr>
-          </thead>
-
-          {articles.length === 0 && (
-            <tbody>
-              <tr>
-                <td colSpan={4} className='text-center py-10 text-gray-500'>
-                  No Articles Yet
-                </td>
+      <div className='p-8'>
+        <div className='overflow-x-auto'>
+          <table className='w-full border-separate border-spacing-y-3'>
+            <thead>
+              <tr className='text-[10px] font-black text-white/20 uppercase tracking-[0.3em]'>
+                <th className='px-4 pb-4 text-left font-black'>Visual_ID</th>
+                <th className='px-4 pb-4 text-left font-black'>Log_Title</th>
+                <th className='px-4 pb-4 text-left font-black'>Status</th>
+                <th className='px-4 pb-4 text-left font-black'>Data_Link</th>
+                <th className='px-4 pb-4 text-center font-black'>Protocols</th>
               </tr>
-            </tbody>
-          )}
+            </thead>
 
-          <tbody>
-            {articles.map((article) => (
-              <tr
-                key={article.id}
-                className='border-b border-[#1a1a1a] hover:bg-[#141414] transition'
-              >
-                <td className='py-5'>
-                  <div className='relative w-14 h-14 rounded-md overflow-hidden border border-gray-700'>
-                    <Image
-                      src={article.image}
-                      alt={article.title}
-                      fill
-                      className='object-cover'
-                    />
-                  </div>
-                </td>
-
-                <td>
-                  <div>
-                    <p className='text-white font-medium'>{article.title}</p>
-                    <p className='text-xs text-gray-500 mt-1'>
-                      {new Date(article.createdAt).toLocaleDateString()}
+            {articles.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={5} className='text-center py-20 bg-white/[0.02] rounded-3xl border border-dashed border-white/10'>
+                    <p className='text-[10px] font-black text-white/20 uppercase tracking-[0.5em] animate-pulse'>
+                      No data streams detected in registry
                     </p>
-                  </div>
-                </td>
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody>
+                {articles.map((article) => (
+                  <tr
+                    key={article.id}
+                    className='group bg-white/[0.02] hover:bg-white/[0.04] transition-colors border border-white/5'
+                  >
+                    
+                    <td className='py-4 px-4 first:rounded-l-3xl'>
+                      <div className='relative w-16 h-12 rounded-xl overflow-hidden border border-white/10 group-hover:border-[#6A1E55]/50 transition-colors'>
+                        <Image
+                          src={article.image}
+                          alt={article.title}
+                          fill
+                          className='object-cover grayscale group-hover:grayscale-0 transition-all duration-500'
+                        />
+                      </div>
+                    </td>
 
-                <td className='py-4 '>
-                  {article.featured === true ? (
-                    <span className='text-green-400 font-semibold'>Yes</span>
-                  ) : (
-                    <span className='text-red-400 font-semibold'>No</span>
-                  )}
-                </td>
+                    
+                    <td className='px-4'>
+                      <div className='flex flex-col'>
+                        <p className='text-sm font-bold text-white tracking-tight group-hover:text-[#A64D79] transition-colors'>
+                          {article.title}
+                        </p>
+                        <div className='flex items-center gap-2 mt-1'>
+                           <Globe size={10} className='text-white/20' />
+                           <p className='text-[9px] font-mono text-white/30 uppercase tracking-tighter'>
+                             {new Date(article.createdAt).toISOString().split('T')[0]} | {article.slug}
+                           </p>
+                        </div>
+                      </div>
+                    </td>
 
-                <td className='py-5   text-gray-400'>{article.slug}</td>
+                    
+                    <td className='px-4'>
+                      {article.featured ? (
+                        <div className='inline-flex items-center gap-2 px-3 py-1 bg-[#6A1E55]/10 border border-[#6A1E55]/30 rounded-full'>
+                           <ShieldCheck size={10} className='text-[#A64D79]' />
+                           <span className='text-[9px] font-black text-[#A64D79] uppercase tracking-widest'>Priority</span>
+                        </div>
+                      ) : (
+                        <div className='inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full'>
+                           <ShieldAlert size={10} className='text-white/20' />
+                           <span className='text-[9px] font-black text-white/20 uppercase tracking-widest'>Standard</span>
+                        </div>
+                      )}
+                    </td>
 
-                <td className='py-5 text-center flex items-center gap-3 justify-center'>
-                  <Link href={`/control/articles/${article.slug}`}>
-                    <button
-                      className='flex items-center gap-2 px-4 py-2 rounded-md
-                                 border border-green-500/40 text-green-400
-                                 hover:bg-green-500/10 hover:border-green-500
-                                 transition'
-                    >
-                      <Pen className='w-4 h-4' />
-                    </button>
-                  </Link>
+                    
+                    <td className='px-4'>
+                      <div className='flex items-center gap-2 text-white/40'>
+                        <Hash size={12} className='text-[#6A1E55]' />
+                        <span className='text-[10px] font-mono lowercase'>{article.slug}</span>
+                      </div>
+                    </td>
 
-                  <form action={deleteArticle}>
-                    <input type='hidden' name='id' value={article.id} />
-                    <button
-                      className='flex items-center gap-2 px-4 py-2 rounded-md
-                                 border border-red-500/40 text-red-400
-                                 hover:bg-red-500/10 hover:border-red-500
-                                 transition'
-                    >
-                      <Trash2 className='w-4 h-4' />
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    
+                    <td className='px-4 text-center last:rounded-r-3xl'>
+                      <div className='flex items-center justify-center gap-2'>
+                        <Link href={`/control/articles/${article.slug}`}>
+                          <button className='p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white hover:border-[#6A1E55] hover:bg-[#6A1E55]/10 transition-all'>
+                            <Pen size={14} />
+                          </button>
+                        </Link>
+
+                        <form action={deleteArticle}>
+                          <input type='hidden' name='id' value={article.id} />
+                          <button className='p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-all'>
+                            <Trash2 size={14} />
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            )}
+          </table>
+        </div>
       </div>
 
       {success && (
-        <SuccessToast url='/control/articles' text='Deleted Successfully!' />
+        <SuccessToast url='/control/articles' text='Log Purged Successfully' />
       )}
     </div>
   )

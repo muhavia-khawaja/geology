@@ -1,7 +1,15 @@
 import SuccessToast from '@/components/SuccessToast'
 import { deleteReview, getAllReview } from '@/utils/actions'
-import { PenBox, Trash2 } from 'lucide-react'
-import Link from 'next/link'
+import {
+  Trash2,
+  MessageSquare,
+  Star,
+  Mail,
+  User,
+  ShieldAlert,
+  Activity,
+} from 'lucide-react'
+import React from 'react'
 
 export default async function Page({
   searchParams,
@@ -12,133 +20,172 @@ export default async function Page({
   const reviews = await getAllReview()
 
   return (
-    <div className='bg-[#0f0f0f] min-h-screen '>
-      <div className='max-w-7xl mx-auto bg-[#111111] border border-[#1c1c1c]  shadow-[0_0_40px_rgba(34,197,94,0.04)] p-6'>
-        <div className=' mb-10'>
-          <div>
-            <h2 className='text-3xl font-bold text-white tracking-wide'>
-              Reviews
-            </h2>
-            <p className='text-gray-500 text-sm mt-1'>
-              Manage and delete user submitted reviews
-            </p>
-          </div>
+    <div className='max-w-6xl mx-auto pb-20 animate-in fade-in duration-700'>
+      <div className='flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12'>
+        <div>
+          <h2 className='text-3xl font-black italic text-white tracking-tighter uppercase'>
+            Sentiment_<span className='text-[#6A1E55]'>Monitor</span>
+          </h2>
+          <p className='text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mt-2 flex items-center gap-2'>
+            <Activity size={12} className='text-[#6A1E55] animate-pulse' />
+            Live Public Feedback Feed // Audit Required
+          </p>
         </div>
+      </div>
 
-        {reviews.length === 0 && (
-          <div className='text-center py-20 border border-dashed border-[#222] rounded-xl'>
-            <h3 className='text-lg font-semibold text-gray-400'>
-              No Reviews Yet
-            </h3>
-            <p className='text-sm text-gray-600 mt-2'>
-              Reviews submitted by users will appear here.
-            </p>
-          </div>
-        )}
+      {reviews.length === 0 ? (
+        <div className='bg-[#0D0D0F] border border-white/5 rounded-[3rem] py-32 text-center'>
+          <MessageSquare className='w-12 h-12 text-white/5 mx-auto mb-6' />
+          <h3 className='text-[10px] font-black text-white/20 uppercase tracking-[0.5em]'>
+            No Active Transmissions Detected
+          </h3>
+        </div>
+      ) : (
+        <>
+          <div className='hidden md:block bg-[#0D0D0F] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl'>
+            <table className='w-full border-collapse'>
+              <thead>
+                <tr className='text-[10px] font-black text-white/20 uppercase tracking-[0.3em] border-b border-white/5'>
+                  <th className='px-8 py-6 text-left'>Source_Entity</th>
+                  <th className='px-8 py-6 text-left'>Contact_Protocol</th>
+                  <th className='px-8 py-6 text-left'>Transmission_Data</th>
+                  <th className='px-8 py-6 text-right'>System_Purge</th>
+                </tr>
+              </thead>
 
-        {reviews.length > 0 && (
-          <>
-            <div className='hidden md:block overflow-x-auto rounded-xl border border-[#1a1a1a]'>
-              <table className='w-full text-sm'>
-                <thead className='bg-[#151515] text-gray-400 uppercase text-xs tracking-wider'>
-                  <tr>
-                    <th className='px-6 py-4 text-left'>Name / Rating</th>
-                    <th className='px-6 py-4 text-left'>Email</th>
-                    <th className='px-6 py-4 text-left'>Message</th>
-                    <th className='px-6 py-4 text-center'>Action</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {reviews.map((review) => (
-                    <tr
-                      key={review.id}
-                      className='border-t border-[#1a1a1a] hover:bg-[#141414] transition'
-                    >
-                      <td className='px-6 py-5 text-gray-400'>
+              <tbody className='divide-y divide-white/[0.03]'>
+                {reviews.map((review) => (
+                  <tr
+                    key={review.id}
+                    className='group hover:bg-white/[0.02] transition-colors'
+                  >
+                    <td className='px-8 py-6'>
+                      <div className='flex items-center gap-4'>
+                        <div className='p-3 bg-white/5 rounded-xl border border-white/5 text-white/40 group-hover:text-[#6A1E55] group-hover:border-[#6A1E55]/30 transition-all'>
+                          <User size={16} />
+                        </div>
                         <div>
-                          <p className='text-white font-medium'>
+                          <p className='text-sm font-bold text-white group-hover:text-[#A64D79] transition-colors'>
                             {review.name}
                           </p>
-                          <p className='text-xs text-gray-500 mt-1'>
-                            <div className='rating'>
-                              {[...Array(5)].map((_, i) => (
-                                <span
-                                  key={i}
-                                  className={`mask mask-star-2 w-3 h-3 opacity-100 ${
-                                    i < review.rating
-                                      ? 'bg-yellow-400'
-                                      : 'bg-gray-500'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </p>
+                          <div className='flex items-center gap-0.5 mt-1'>
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                size={10}
+                                fill={
+                                  i < review.rating ? '#A64D79' : 'transparent'
+                                }
+                                className={
+                                  i < review.rating
+                                    ? 'text-[#A64D79]'
+                                    : 'text-white/10'
+                                }
+                              />
+                            ))}
+                          </div>
                         </div>
-                      </td>
-                      <td className='px-6 py-5 text-gray-400'>
+                      </div>
+                    </td>
+
+                    <td className='px-8 py-6'>
+                      <div className='flex items-center gap-2 text-white/40 font-mono text-[10px]'>
+                        <Mail size={12} className='text-[#6A1E55]' />
                         {review.email}
-                      </td>
+                      </div>
+                    </td>
 
-                      <td className='px-6 py-5 text-gray-400 max-w-xs truncate'>
+                    <td className='px-8 py-6'>
+                      <p className='text-[11px] leading-relaxed text-white/60 max-w-xs line-clamp-2 italic'>
                         {review.content}
-                      </td>
+                      </p>
+                    </td>
 
-                      <td className='px-6 py-5 text-center'>
+                    <td className='px-8 py-6'>
+                      <div className='flex justify-end'>
                         <form action={deleteReview}>
                           <input type='hidden' name='id' value={review.id} />
-                          <button
-                            className='inline-flex items-center gap-2 px-4 py-2 
-                                       rounded-lg border border-red-500/40 
-                                       text-red-400 hover:bg-red-500/10 
-                                       hover:border-red-500 transition'
-                          >
-                            <Trash2 className='w-4 h-4' />
-                            Delete
+                          <button className='p-3 bg-white/5 border border-white/10 rounded-xl text-white/20 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-all group/del'>
+                            <Trash2
+                              size={16}
+                              className='group-hover/del:scale-110 transition-transform'
+                            />
                           </button>
                         </form>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-            <div className='md:hidden space-y-5'>
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className='bg-[#141414] border border-[#1c1c1c] rounded-xl p-5 space-y-3 shadow-sm'
-                >
-                  <div>
-                    <p className='text-white font-semibold'>{review.name}</p>
-                    <p className='text-xs text-gray-500'>{review.email}</p>
+          <div className='md:hidden space-y-4'>
+            {reviews.map((review) => (
+              <div
+                key={review.id}
+                className='bg-[#0D0D0F] border border-white/5 rounded-3xl p-6 space-y-4'
+              >
+                <div className='flex justify-between items-start'>
+                  <div className='flex items-center gap-3'>
+                    <div className='p-2 bg-white/5 rounded-lg text-[#6A1E55]'>
+                      <User size={14} />
+                    </div>
+                    <div>
+                      <h4 className='text-xs font-bold text-white uppercase tracking-wider'>
+                        {review.name}
+                      </h4>
+                      <div className='flex items-center gap-0.5 mt-1'>
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={8}
+                            fill={i < review.rating ? '#A64D79' : 'transparent'}
+                            className='text-[#A64D79]'
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-
-                  <p className='text-sm text-gray-400'>{review.content}</p>
-
-                  <form action={deleteReview} className='pt-2'>
+                  <form action={deleteReview}>
                     <input type='hidden' name='id' value={review.id} />
-                    <button
-                      className='w-full flex items-center justify-center gap-2 
-                                 px-4 py-2 rounded-lg border border-red-500/40 
-                                 text-red-400 hover:bg-red-500/10 
-                                 hover:border-red-500 transition'
-                    >
-                      <Trash2 className='w-4 h-4' />
-                      Delete Review
+                    <button className='p-2 text-white/20 hover:text-red-500 transition-colors'>
+                      <Trash2 size={16} />
                     </button>
                   </form>
                 </div>
-              ))}
-            </div>
-          </>
-        )}
 
-        {success && (
-          <SuccessToast url='/control/reviews' text='Deleted Successfully!' />
-        )}
+                <div className='bg-black/40 rounded-2xl p-4 border border-white/5'>
+                  <p className='text-xs text-white/50 leading-relaxed italic line-clamp-4'>
+                    {review.content}
+                  </p>
+                </div>
+
+                <div className='flex items-center gap-2 text-[10px] font-mono text-white/20'>
+                  <Mail size={10} />
+                  {review.email}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className='mt-10 pt-8 border-t border-white/5 flex items-center justify-between'>
+        <div className='flex items-center gap-4 text-white/10'>
+          <ShieldAlert size={14} />
+          <span className='text-[8px] font-black uppercase tracking-[0.3em]'>
+            System Audit: Operational
+          </span>
+        </div>
       </div>
+
+      {success && (
+        <SuccessToast
+          url='/control/reviews'
+          text='Transmission Purged Successfully'
+        />
+      )}
     </div>
   )
 }
