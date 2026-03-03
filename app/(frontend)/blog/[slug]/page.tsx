@@ -16,6 +16,56 @@ import {
 } from 'lucide-react'
 import parse from 'html-react-parser'
 import Reviews from '@/components/Review'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> => {
+  const article = await getSingleArticle(params.slug)
+  if (!article) {
+    notFound()
+  }
+
+  return {
+    title: {
+      absolute: article.title || 'Article',
+    },
+    description:
+      article.short_desc ||
+      `Download the ${article.title} article for comprehensive educational resources.`,
+    keywords: article.title
+      ? `${article.title}, geology, earth science, rocks, minerals, fossils, geology education, geology resources, geology articles, geology news`
+      : 'geology, earth science, rocks, minerals, fossils, geology education, geology resources, geology articles, geology news',
+    authors: [
+      {
+        name: 'Khawaja Ameer Muhavia',
+        url: 'https://geology-stone.vercel.app',
+      },
+    ],
+    creator: 'Khawaja Ameer Muhavia',
+    publisher: 'Geology Stone',
+    openGraph: {
+      title: article.title || 'Article',
+      description:
+        article.short_desc ||
+        `Download the ${article.title} article for comprehensive educational resources.`,
+      url: `https://geology-stone.vercel.app/blog/${article.slug}`,
+      siteName: 'Geology Stone',
+      images: [
+        {
+          url: article.image,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+      locale: 'en_US',
+    },
+  }
+}
 
 export const revalidate = 0
 
@@ -23,7 +73,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const article = await getSingleArticle(params.slug)
   const allArticles = await getAllArticles()
 
-  // Filter out the current article from related posts
   const relatedPosts = allArticles
     .filter((a) => a.slug !== params.slug)
     .slice(0, 3)

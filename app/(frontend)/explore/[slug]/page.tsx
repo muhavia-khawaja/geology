@@ -12,6 +12,56 @@ import {
 import Link from 'next/link'
 import ModalImage from '@/components/Modal'
 import { cookies } from 'next/headers'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> => {
+  const item = await getItem(params.slug)
+  if (!item) {
+    notFound()
+  }
+
+  return {
+    title: {
+      absolute: item.title || 'item',
+    },
+    description:
+      item.short_desc ||
+      `Download the ${item.title} item for comprehensive educational resources.`,
+    keywords: item.title
+      ? `${item.title}, geology, earth science, rocks, minerals, fossils, geology education, geology resources, geology items, geology news`
+      : 'geology, earth science, rocks, minerals, fossils, geology education, geology resources, geology items, geology news',
+    authors: [
+      {
+        name: 'Khawaja Ameer Muhavia',
+        url: 'https://geology-stone.vercel.app',
+      },
+    ],
+    creator: 'Khawaja Ameer Muhavia',
+    publisher: 'Geology Stone',
+    openGraph: {
+      title: item.title || 'item',
+      description:
+        item.short_desc ||
+        `Download the ${item.title} item for comprehensive educational resources.`,
+      url: `https://geology-stone.vercel.app/explore/${item.slug}`,
+      siteName: 'Geology Stone',
+      images: [
+        {
+          url: item.image,
+          width: 1080,
+          height: 1080,
+          alt: item.title,
+        },
+      ],
+      locale: 'en_US',
+    },
+  }
+}
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const slug = params.slug

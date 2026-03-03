@@ -22,7 +22,7 @@ export default async function Page({ params, searchParams }: Props) {
 
   return (
     <div className='max-w-6xl mx-auto pb-20'>
-      {/* --- TOP BAR --- */}
+      
       <div className='flex items-center justify-between mb-10'>
         <div className='flex items-center gap-4'>
           <Link 
@@ -52,7 +52,7 @@ export default async function Page({ params, searchParams }: Props) {
       <form action={updateArticle} className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
         <input type='hidden' name='id' value={article.id} />
 
-        {/* --- LEFT COLUMN: CONFIGURATION --- */}
+        
         <div className='lg:col-span-1 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 rounded-[2rem] space-y-6'>
             <div className='flex items-center gap-2 mb-2'>
@@ -60,7 +60,7 @@ export default async function Page({ params, searchParams }: Props) {
               <span className='text-[10px] font-black text-white/30 uppercase tracking-widest'>Core Metadata</span>
             </div>
 
-            {/* Slug Input */}
+            
             <div className='space-y-2'>
               <label className='text-[10px] font-bold text-white/40 uppercase ml-1'>Registry Slug</label>
               <input
@@ -71,7 +71,7 @@ export default async function Page({ params, searchParams }: Props) {
               />
             </div>
 
-            {/* Featured Checkbox */}
+            
             <div className='p-4 bg-white/[0.02] border border-white/5 rounded-2xl'>
               <label className='flex items-center justify-between cursor-pointer'>
                 <div className='flex flex-col'>
@@ -87,7 +87,7 @@ export default async function Page({ params, searchParams }: Props) {
               </label>
             </div>
 
-            {/* Media Preview */}
+            
             <div className='space-y-4 pt-4 border-t border-white/5'>
               <div className='flex items-center gap-2'>
                 <ImageIcon size={14} className='text-[#6A1E55]' />
@@ -121,11 +121,11 @@ export default async function Page({ params, searchParams }: Props) {
           </button>
         </div>
 
-        {/* --- RIGHT COLUMN: CONTENT --- */}
+        
         <div className='lg:col-span-2 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 rounded-[2rem] space-y-8'>
             
-            {/* Title */}
+            
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
                 <Type size={14} className='text-[#6A1E55]' />
@@ -140,7 +140,7 @@ export default async function Page({ params, searchParams }: Props) {
               />
             </div>
 
-            {/* Short Desc */}
+            
             <div className='space-y-3'>
               <label className='text-[10px] font-bold text-white/40 uppercase ml-1'>Briefing Overlay</label>
               <textarea
@@ -151,7 +151,7 @@ export default async function Page({ params, searchParams }: Props) {
               />
             </div>
 
-            {/* Long Desc */}
+            
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
                 <Layout size={14} className='text-[#6A1E55]' />

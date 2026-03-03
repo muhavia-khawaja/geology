@@ -21,7 +21,7 @@ export default function Page({
 
   return (
     <div className='max-w-6xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700'>
-      {/* --- BREADCRUMBS & NAVIGATION --- */}
+      
       <div className='flex items-center justify-between mb-12'>
         <div className='flex items-center gap-6'>
           <Link 
@@ -50,14 +50,14 @@ export default function Page({
 
       <form action={createCategory} className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
         
-        {/* --- MAIN COLUMN: SECTOR CORE --- */}
+        
         <div className='lg:col-span-2 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 lg:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden'>
-            {/* Themed ambient glow */}
+            
             <div className='absolute -top-24 -right-24 w-64 h-64 bg-[#6A1E55]/5 blur-[120px] pointer-events-none' />
             
             <div className='space-y-12'>
-              {/* Sector Title */}
+              
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
                   <Type size={14} className='text-[#6A1E55]' />
@@ -72,7 +72,7 @@ export default function Page({
                 />
               </div>
 
-              {/* Long Description */}
+              
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
                   <Layers size={14} className='text-[#6A1E55]' />
@@ -89,7 +89,7 @@ export default function Page({
           </div>
         </div>
 
-        {/* --- SIDEBAR: PROTOCOLS --- */}
+        
         <div className='lg:col-span-1 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 rounded-[2.5rem] space-y-8 sticky top-28'>
             
@@ -98,7 +98,7 @@ export default function Page({
               <span className='text-[10px] font-black text-white/30 uppercase tracking-widest'>Data_Config</span>
             </div>
 
-            {/* Featured Protocol */}
+            
             <div className='p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4'>
               <div className='flex items-center justify-between group cursor-pointer'>
                 <div className='flex flex-col'>
@@ -118,7 +118,7 @@ export default function Page({
               </div>
             </div>
 
-            {/* Submit Section */}
+            
             <div className='space-y-4'>
               <button
                 type='submit'

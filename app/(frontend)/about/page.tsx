@@ -7,6 +7,15 @@ import {
   Terminal,
   Fingerprint,
 } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About Us - Gravestone',
+  description:
+    "Discover Gravestone, the apex intelligence platform dedicated to decoding Earth's physical history. We interpret sub-surface signals to provide high-fidelity geological intelligence for those navigating the field.",
+  keywords:
+    'Gravestone, geological intelligence, Earth history, sub-surface signals, geology platform, seismic decryption, geological research, geology education',
+}
 
 export default function AboutPage() {
   return (
@@ -25,8 +34,8 @@ export default function AboutPage() {
             The <span className='text-[#6A1E55]'>Registry.</span>
           </h1>
           <p className='text-lg md:text-xl text-white/40 font-medium max-w-2xl italic'>
-            Monitoring the Earths structural integrity through advanced seismic
-            decryption and geological intelligence.
+            Monitoring the Earth&apos;s structural integrity through advanced
+            seismic decryption and geological intelligence.
           </p>
         </header>
 
@@ -49,8 +58,8 @@ export default function AboutPage() {
               </h3>
               <p className='text-white/50 leading-relaxed text-base font-medium'>
                 Gravestone is an apex intelligence platform dedicated to the
-                decryption of Earth&apos;s physical history. We don&apos;t just study
-                rocks; we interpret the{' '}
+                decryption of Earth&apos;s physical history. We don&apos;t just
+                study rocks; we interpret the{' '}
                 <span className='text-white italic'>sub-surface signals</span>{' '}
                 that dictate the future of our physical landscape. Our mission
                 is to provide high-fidelity geological intelligence to those
@@ -78,8 +87,8 @@ export default function AboutPage() {
               <p className='text-white/50 leading-relaxed text-base font-medium'>
                 Our team is a fragmented network of veteran geologists, seismic
                 researchers, and data educators. We are unified by a singular
-                objective: fostering a deeper, raw understanding of our planet&apos;s
-                violent and silent shifts.
+                objective: fostering a deeper, raw understanding of our
+                planet&apos;s violent and silent shifts.
               </p>
 
               <div className='bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex items-center justify-between'>

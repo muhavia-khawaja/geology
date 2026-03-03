@@ -14,7 +14,7 @@ export default async function Page({
 
   return (
     <div className='bg-[#0D0D0F] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl animate-in fade-in duration-700'>
-      {/* --- HEADER --- */}
+      
       <div className='p-8 pb-0 flex justify-between items-end'>
         <div>
           <h2 className='text-3xl font-black italic text-white tracking-tighter uppercase'>
@@ -63,7 +63,7 @@ export default async function Page({
                     key={category.id}
                     className='group bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300'
                   >
-                    {/* Title & Metadata */}
+                    
                     <td className='py-4 px-6 first:rounded-l-3xl border-l border-y border-white/5 group-hover:border-[#6A1E55]/30 transition-colors'>
                       <div className='flex items-center gap-4'>
                         <div className='p-3 bg-white/5 rounded-xl text-white/20 group-hover:text-[#6A1E55] transition-colors'>
@@ -80,7 +80,7 @@ export default async function Page({
                       </div>
                     </td>
 
-                    {/* Featured Status */}
+                    
                     <td className='px-6 text-center border-y border-white/5 group-hover:border-[#6A1E55]/30 transition-colors'>
                       {category.featured ? (
                         <div className='inline-flex items-center gap-2 px-3 py-1 bg-[#6A1E55]/10 border border-[#6A1E55]/30 rounded-full'>
@@ -95,7 +95,7 @@ export default async function Page({
                       )}
                     </td>
 
-                    {/* Actions */}
+                    
                     <td className='px-6 text-center last:rounded-r-3xl border-r border-y border-white/5 group-hover:border-[#6A1E55]/30 transition-colors'>
                       <div className='flex items-center justify-center gap-3'>
                         <Link href={`/control/categories/${category.id}`}>

@@ -1,7 +1,16 @@
 import SearchModal from '@/components/SearchModal'
 import Tab from '@/components/Tab'
 import { getALlCategories } from '@/utils/actions'
+import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+
+
+export const metadata: Metadata = {
+  title: 'Explore Geology Categories',
+  description: "Explore geological categories, access seismic logs, tectonic data, and educational resources across protected sectors.",
+  keywords:
+    '',
+}
 
 export default async function Page() {
   const categories = await getALlCategories()

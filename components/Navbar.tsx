@@ -17,7 +17,7 @@ export default function Navbar() {
 
   return (
     <>
-      <div className='fixed top-6 left-1/2  w-[92%] -translate-x-1/2 z-50'>
+      <div className='fixed top-6 left-1/2  w-[92%] -translate-x-1/2 z-40'>
         <div className='navbar rounded-full border border-vivid-purple/30 bg-rich-black/80 backdrop-blur-md shadow-2xl shadow-black/50 px-6'>
           <div className='lg:hidden navbar-start'>
             <button

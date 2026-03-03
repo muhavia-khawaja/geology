@@ -12,6 +12,56 @@ import {
 import Link from 'next/link'
 import ModalImage from '@/components/Modal'
 import { cookies } from 'next/headers'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: { childSlug: string }
+}): Promise<Metadata> => {
+  const item = await getSubItem(params.childSlug)
+  if (!item) {
+    notFound()
+  }
+
+  return {
+    title: {
+      absolute: item.title || 'item',
+    },
+    description:
+      item.short_desc ||
+      `Download the ${item.title} item for comprehensive educational resources.`,
+    keywords: item.title
+      ? `${item.title}, geology, earth science, rocks, minerals, fossils, geology education, geology resources, geology items, geology news`
+      : 'geology, earth science, rocks, minerals, fossils, geology education, geology resources, geology items, geology news',
+    authors: [
+      {
+        name: 'Khawaja Ameer Muhavia',
+        url: 'https://geology-stone.vercel.app',
+      },
+    ],
+    creator: 'Khawaja Ameer Muhavia',
+    publisher: 'Geology Stone',
+    openGraph: {
+      title: item.title || 'item',
+      description:
+        item.short_desc ||
+        `Download the ${item.title} item for comprehensive educational resources.`,
+      url: `https://geology-stone.vercel.app/exolore/${item.item.slug}/${item.slug}`,
+      siteName: 'Geology Stone',
+      images: [
+        {
+          url: item.image,
+          width: 1080,
+          height: 1080,
+          alt: item.title,
+        },
+      ],
+      locale: 'en_US',
+    },
+  }
+}
 
 export default async function Page({
   params,
@@ -23,7 +73,6 @@ export default async function Page({
   const cookieStore = await cookies()
   const token = cookieStore.get('token')?.value
 
-  // --- ERROR: RECORD NOT FOUND ---
   if (!item) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-[#0A0A0B] px-4'>

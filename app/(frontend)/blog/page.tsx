@@ -2,6 +2,15 @@ import { getAllArticles, getFeaturedArticles } from '@/utils/actions'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Terminal, Newspaper, ArrowRight, Activity } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Latest Insights - Gravestone',
+  description:
+    "Access decrypted research logs, tectonic shift analysis, and recent seismic findings from the global registry. Stay informed with Gravestone's latest geological intelligence and insights.",
+  keywords:
+    'geology insights, seismic findings, tectonic shift analysis, geological intelligence, research logs, geology news, earth science updates, geology articles',
+}
 
 export default async function Page() {
   const articles = await getAllArticles()
@@ -9,10 +18,8 @@ export default async function Page() {
 
   return (
     <div className='relative min-h-screen bg-[#0A0A0B] py-24 px-6 selection:bg-[#6A1E55]/30'>
-      {/* Background Decor */}
       <div className='absolute top-0 right-0 w-[500px] h-[500px] bg-[#6A1E55]/5 blur-[120px] rounded-full pointer-events-none' />
 
-      {/* Header Section */}
       <header className='relative z-10 mx-auto max-w-3xl text-center mb-24'>
         <div className='flex items-center justify-center gap-3 mb-6'>
           <div className='h-px w-12 bg-[#6A1E55]' />
@@ -32,7 +39,6 @@ export default async function Page() {
         </p>
       </header>
 
-      {/* Standard Articles Grid */}
       <div className='grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-32'>
         {articles.slice(0, 4).map((article) => (
           <Link
@@ -74,7 +80,6 @@ export default async function Page() {
         ))}
       </div>
 
-      {/* Featured Section */}
       {featuredArticles.length > 0 && (
         <section className='relative'>
           <div className='flex items-center gap-4 mb-12'>
@@ -94,7 +99,6 @@ export default async function Page() {
                            overflow-hidden hover:border-[#6A1E55] transition-all duration-500 shadow-2xl'
               >
                 <div className='flex flex-col lg:flex-row h-full'>
-                  {/* Image */}
                   <figure className='relative w-full lg:w-64 h-64 lg:h-auto shrink-0'>
                     <Image
                       src={article.image}
@@ -106,7 +110,6 @@ export default async function Page() {
                     <div className='absolute inset-0 bg-gradient-to-r from-[#111114] via-transparent to-transparent hidden lg:block' />
                   </figure>
 
-                  {/* Content */}
                   <div className='flex flex-col justify-between p-8 flex-1'>
                     <div className='space-y-4'>
                       <div className='flex items-center gap-2'>

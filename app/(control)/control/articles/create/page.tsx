@@ -24,7 +24,7 @@ export default function Page({
 
   return (
     <div className='max-w-6xl mx-auto pb-20 animate-in fade-in duration-500'>
-      {/* --- BREADCRUMBS / HEADER --- */}
+      
       <div className='flex items-center justify-between mb-10'>
         <div className='flex items-center gap-5'>
           <Link 
@@ -53,14 +53,14 @@ export default function Page({
 
       <form action={createArticle} className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
         
-        {/* --- LEFT COLUMN: CONTENT ENGINE --- */}
+        
         <div className='lg:col-span-2 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 lg:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden'>
-            {/* Subtle background glow */}
+            
             <div className='absolute -top-24 -left-24 w-48 h-48 bg-[#6A1E55]/10 blur-[100px] pointer-events-none' />
             
             <div className='space-y-10'>
-              {/* Title Field */}
+              
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
                   <Type size={14} className='text-[#6A1E55]' />
@@ -75,7 +75,7 @@ export default function Page({
                 />
               </div>
 
-              {/* Short Description */}
+              
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
                   <Info size={14} className='text-[#6A1E55]' />
@@ -89,7 +89,7 @@ export default function Page({
                 />
               </div>
 
-              {/* Long Description */}
+              
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
                   <AlignLeft size={14} className='text-[#6A1E55]' />
@@ -106,11 +106,11 @@ export default function Page({
           </div>
         </div>
 
-        {/* --- RIGHT COLUMN: PROTOCOLS --- */}
+        
         <div className='lg:col-span-1 space-y-6'>
           <div className='bg-[#0D0D0F] border border-white/5 p-8 rounded-[2.5rem] space-y-8 sticky top-28'>
             
-            {/* Slug Protocol */}
+            
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
                 <Hash size={14} className='text-[#6A1E55]' />
@@ -125,7 +125,7 @@ export default function Page({
               />
             </div>
 
-            {/* Image Protocol */}
+            
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
                 <ImageIcon size={14} className='text-[#6A1E55]' />
@@ -142,7 +142,7 @@ export default function Page({
               </div>
             </div>
 
-            {/* Featured Protocol */}
+            
             <div className='p-5 bg-white/[0.02] border border-white/5 rounded-2xl'>
               <label className='flex items-center justify-between cursor-pointer group'>
                 <div className='flex flex-col'>
@@ -157,7 +157,7 @@ export default function Page({
               </label>
             </div>
 
-            {/* Submit Button */}
+            
             <div className='pt-4'>
               <button
                 type='submit'
